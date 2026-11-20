@@ -488,6 +488,9 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
     # ================================================================= building
     def build(self) -> None:
         dpg.create_context()
+        # every callback runs on this thread, between frames (Dear PyGui's own callback thread raced the frame
+        # loop: a form rebuilt by a checkbox while the loop read its widgets)
+        dpg.configure_app(manual_callback_management=True)
         th.load_fonts(self.zoom)
         th.apply_theme()
         dpg.create_viewport(title="PyWaveDude", width=int(config.app("ui.window_width", 1600)),
@@ -695,7 +698,7 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         if item and dpg.does_item_exist(item) and "Input" in dpg.get_item_type(item) and dpg.is_item_active(item):
             return True
         ed = self._editor
-        if ed is not None and any(dpg.does_item_exist(w) and dpg.is_item_active(w) for w in ed.widgets.values()):
+        if ed is not None and any(dpg.does_item_exist(w) and dpg.is_item_active(w) for w in list(ed.widgets.values())):
             return True
         return False
 
@@ -905,6 +908,7 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
                 self._menus_version = self._model_version
                 self._sync_menus()
             dpg.render_dearpygui_frame()
+            dpg.run_callbacks(dpg.get_callback_queue())
         self.stop()
         self.scratch.close()
         dpg.destroy_context()
