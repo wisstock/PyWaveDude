@@ -155,13 +155,27 @@ class PreviewMixin:
         self._apply_view()
 
     def _on_wheel(self, _s, delta) -> None:
+        """The wheel (or two fingers on a touchpad): zoom at the pointer, or, with ``canvas.wheel: pan``, move the
+        view (Shift: sideways) and zoom with Ctrl/Cmd held."""
         pn = self._hovered_panel()
         if pn is None or not delta:
             return
-        self._zoom_at(float(config.app("canvas.zoom_step", 1.2)) ** float(delta), pn, self._mouse_canvas(pn))
+        zoom = config.app("canvas.wheel", "zoom") != "pan" or self._command_down()
+        if zoom:
+            self._zoom_at(float(config.app("canvas.zoom_step", 1.2)) ** float(delta), pn, self._mouse_canvas(pn))
+            return
+        step = float(config.app("canvas.wheel_pan_step", 60)) / pn["k"] * float(delta)
+        if self._shift_down():
+            self.view_x -= step
+        else:
+            self.view_y -= step
+        self._apply_view()
 
-    def _start_pan(self, pn) -> None:
-        self._pan = dict(mouse=tuple(dpg.get_mouse_pos(local=False)), v0=(self.view_x, self.view_y), k=pn["k"])
+    def _start_pan(self, pn, clears: bool = False) -> None:
+        """Move the view with the mouse; ``clears``: a click that does not move deselects (left button on empty
+        canvas)."""
+        self._pan = dict(mouse=tuple(dpg.get_mouse_pos(local=False)), v0=(self.view_x, self.view_y), k=pn["k"],
+                         clears=clears, moved=False)
 
     def _update_pan(self) -> None:
         pan = self._pan
@@ -170,8 +184,12 @@ class PreviewMixin:
         if not any(dpg.is_mouse_button_down(b) for b in (dpg.mvMouseButton_Left, dpg.mvMouseButton_Right,
                                                         dpg.mvMouseButton_Middle)):
             self._pan = None
+            if pan["clears"] and not pan["moved"]:
+                self._select([], current=None)
             return
         mx, my = dpg.get_mouse_pos(local=False)
+        if abs(mx - pan["mouse"][0]) + abs(my - pan["mouse"][1]) >= 3:
+            pan["moved"] = True
         x = pan["v0"][0] - (mx - pan["mouse"][0]) / pan["k"]
         y = pan["v0"][1] - (my - pan["mouse"][1]) / pan["k"]
         if (x, y) != (self.view_x, self.view_y):
@@ -524,6 +542,9 @@ class PreviewMixin:
         if hit is None:
             hit = pick(fx, fy, [], [], self.p.parts, PICK() / k)
         if hit is None:
+            if self.view_zoom > 1.0001 and not (self._shift_down() or self._command_down()):
+                self._start_pan(pn, clears=True)     # zoomed in: a drag on empty canvas moves the view
+                return
             self._drag = dict(base, mode="marquee", add=self._shift_down(), toggle=self._command_down())
             return
         obj = {"source": self.p.sources, "probe": self.p.probes, "part": self.p.parts}[hit[0]][hit[1]]

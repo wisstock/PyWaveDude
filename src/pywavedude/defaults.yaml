@@ -20,6 +20,9 @@ app:
     pick_radius: 8                     # screen px: how close a click must be to a marker
     snap_radius: 8                     # screen px: how close a centre must come to a grid line
     lever_length: 28                   # screen px beyond the outline: the rotation lever
+    wheel: zoom                        # mouse wheel / two-finger scroll: zoom (at the pointer) | pan
+                                       #   (pan: Shift scrolls sideways, Ctrl/Cmd + wheel zooms)
+    wheel_pan_step: 60                 # screen px per wheel notch when the wheel pans
     zoom_step: 1.2                     # zoom factor per mouse wheel notch
     max_zoom: 32                       # largest canvas zoom (× the fitted view)
   playback:

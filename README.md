@@ -155,7 +155,8 @@ the fitted radii, in the blank canvas's background index; Fresnel lens as thin).
 | Timeline | ticks in frames; computed part shaded; in/out brackets = export range (drag them); playhead |
 | Transport | Run, Pause/Resume run, Stop, Play/Pause, frame back/forward, In, Out, Clear, Loop, Live (follow the newest frame), position (frame and step), speed, shown layers, arrangement |
 | View row (under the transport) | Zoom −, zoom %, +, Fit; Grid, grid step, Snap, grid opacity; Graphs on the canvas, Graph column; Separate wavelengths, True colour |
-| Canvas zoom | 100 % (whole canvas) to 3200 %, both pictures together; wheel zooms at the pointer; right or middle button drag, or Alt + drag, pans |
+| Canvas zoom | 100 % (whole canvas) to 3200 %, both pictures together; wheel / two-finger scroll zooms at the pointer (or pans, `app.canvas.wheel: pan`) |
+| Canvas pan | when zoomed: drag empty canvas (mouse or touchpad click-drag); anywhere: right or middle button drag, Alt + drag |
 | Undo / redo | unlimited; an edit becomes a step when it has finished (mouse released, field left) |
 | Clipboard | cut, copy, paste, duplicate of sources, parts, probes and colour schemes, as XML text |
 | Colour schemes | project schemes from any scheme; gradient editor: click adds a stop, drag moves it, drag away or double-click removes it; colour and position fields |
@@ -212,7 +213,7 @@ existing setting; an unknown key or a wrong value stops the start with the key's
 |---|---|
 | `app.backend` | compute backend at start (`--backend` overrides it) |
 | `app.ui` | window size, left pane width, tree pane height, probe graph column width, font size, UI zoom and its choices, rows per tree group |
-| `app.canvas` | pick radius, snap radius, rotation lever length (screen pixels), zoom step per wheel notch, largest zoom |
+| `app.canvas` | pick radius, snap radius, rotation lever length (screen pixels), wheel mode (zoom / pan), pan step, zoom step per wheel notch, largest zoom |
 | `app.playback` | speed and its choices, loop, live |
 | `app.run` | memory warning on/off, memory budget as a share of the physical memory |
 | `app.export` | file name, format (`MP4`, `MPEG1`, `AVI`, `MOV`, `MOV_PNG`, `PNG`, `JPEG`, `EXR`, `EXR_ROOT`), layers, part outlines |
@@ -237,10 +238,11 @@ Values in a saved project are its own; an attribute a `.wdproj` file leaves out 
 | Ctrl/Cmd + Z, Y (Shift + Z) | undo, redo |
 | Ctrl/Cmd + X, C, V, D, A | cut, copy, paste, duplicate, select all |
 | F1 | manual |
-| Mouse wheel on a picture | zoom in / out at the pointer |
-| Right or middle drag, Alt + drag | pan the zoomed canvas |
+| Mouse wheel / two-finger scroll on a picture | zoom in / out at the pointer (wheel mode `pan`: scroll, Shift sideways, Ctrl/Cmd zooms) |
+| Drag on empty canvas (zoomed) | pan; Shift or Ctrl/Cmd + drag: marquee |
+| Right or middle drag, Alt + drag | pan |
 | Ctrl/Cmd + =, -, 0 | zoom in, zoom out, whole canvas |
-| Click / drag on canvas | select / move objects (centres snap to the grid when snapping is on); drag empty space for a marquee |
+| Click / drag on canvas | select / move objects (centres snap to the grid when snapping is on); drag empty space for a marquee (zoomed: pans) |
 | Arrows (Shift: ×10), Tab | after a click on the canvas: nudge the selection, select the next object |
 | Del, Backspace | after a click on the canvas: remove the selected objects |
 | Click after **+ Source / Part / Probe** | place the new object (line probes and detectors: two clicks, A then B) |
