@@ -11,6 +11,7 @@ import dearpygui.dearpygui as dpg
 from .export import (DATA, EXTENSIONS, STILLS, ExportFormat, ExportJob, ExportLayer, ExportSpec, available_formats,
                      ffmpeg_path)
 from . import config
+from .canvas_edit import part_center
 from .render import builtin_schemes
 
 LAYER_CHOICES = ("Field", "Intensity", "Both")
@@ -54,6 +55,8 @@ class ExportMixin:
             dpg.add_checkbox(label="Source markers in export", tag="exp_smarkers",
                              default_value=d.source_markers_in_export,
                              callback=lambda _s, v: setattr(self.p.display, "source_markers_in_export", v))
+            dpg.add_checkbox(label="Labels in export", tag="exp_labels", default_value=d.labels_in_export,
+                             callback=lambda _s, v: setattr(self.p.display, "labels_in_export", v))
             with dpg.group(horizontal=True):
                 dpg.add_button(label="Export video", callback=lambda: self._start_export(still=False))
                 dpg.add_button(label="Export shown frame", callback=lambda: self._start_export(still=True))
@@ -128,18 +131,36 @@ class ExportMixin:
             self._last_export = {t: dpg.get_value(t) for t in ("exp_fmt", "exp_layers", "exp_path", "exp_fps",
                                                                   "exp_quality", "exp_from", "exp_to", "exp_edges")}
         spec = ExportSpec(fmt, path, self._export_layers(), first, min(last, m.steps), m.visualize_every,
-                          dpg.get_value("exp_fps"), dpg.get_value("exp_quality"), still, self._export_decor())
+                          dpg.get_value("exp_fps"), dpg.get_value("exp_quality"), still, self._export_decor(eng))
         self.export_job = ExportJob(lambda: eng, spec, self._scene_edges)
         self.export_job.start()
 
-    def _export_decor(self) -> dict:
+    def _export_decor(self, eng=None) -> dict:
         d = self.p.display
         active = [pr for pr in self.p.probes if pr.active]
         sources = [(e[0], e[1]) for s in self.p.sources if s.enabled for e in s.elements(self.p.seed)] \
             if d.source_markers_in_export else []
+        labels = []
+        if d.labels_in_export:
+            labels += [(*part_center(pt), self.name_of(pt)) for pt in self.p.parts if pt.enabled]
+            labels += [(s.x, s.y, s.name) for s in self.p.sources if s.enabled]
+            if not d.probe_graphs_in_export:            # with graphs, a probe's name is its graph's title
+                labels += [(pr.ax, pr.ay, pr.name) for pr in active]
         return dict(probes=active, numbers=[self.p.probes.index(pr) + 1 for pr in active],
                     graphs=d.probe_graphs_in_export, markers=d.probe_markers_in_export, sources=sources,
+                    labels=labels, group_colours=self._export_group_colours(eng),
                     seed=self.p.seed, total_steps=self.p.sim.steps)
+
+    def _export_group_colours(self, eng) -> list:
+        """RGBA per wavelength for intensity probes' per-colour curves (separate wavelengths and the switch on)."""
+        from .engine import wavelength
+        from .render import group_colours
+        levels = getattr(eng, "levels", None)
+        if not levels or not self.p.display.probe_colours:
+            return []
+        cols = group_colours([wavelength(lv, self.p.sim.source_frequency_scale) for lv in levels],
+                             self.p.display.nm_per_px)
+        return [tuple(int(255 * c) for c in col) + (255,) for col in cols]
 
     def _cancel_export(self, *_):
         if self.export_job is not None:

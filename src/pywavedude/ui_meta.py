@@ -83,6 +83,9 @@ OWN = {
     ("DisplaySettings", "nm_per_px"): FieldMeta(
         "nm per px of wavelength", "Colour of a wavelength: λ in px × this, in nm; 0 spreads the wavelengths over "
         "450–650 nm.", "True colour"),
+    ("DisplaySettings", "labels_in_export"): FieldMeta(
+        "Labels in export", "Names of the enabled parts and sources in exported frames, and of the active probes when their graphs "
+        "(titled with the name) are not exported.", "Export"),
     ("DisplaySettings", "grid"): FieldMeta("Grid", "Grid lines over the preview; never exported.", "Grid"),
     ("DisplaySettings", "grid_step"): FieldMeta("Grid step", "Distance of the grid lines in canvas pixels.", "Grid"),
     ("DisplaySettings", "grid_opacity"): FieldMeta("Grid opacity", "0 invisible, 1 opaque.", "Grid"),

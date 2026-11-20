@@ -280,7 +280,8 @@ Menus:
 | OpenEXR | 16-bit float data, intensity as I or √I |
 
 Options: field / intensity / both, frame rate, quality, step range (the timeline's in/out points), part outlines,
-probe graphs, probe and source markers. **Export shown frame** saves a single full-resolution still. **Export last**
+probe graphs (with the per-wavelength curves when *Probe curves per colour* is on), probe and source markers, labels
+(names of parts and sources; of probes when their graphs are not exported). **Export shown frame** saves a single full-resolution still. **Export last**
 (Ctrl/Cmd + E) repeats the session's last export without the dialog.
 
 ### Projects

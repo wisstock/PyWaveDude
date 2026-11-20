@@ -96,6 +96,7 @@ class DisplaySettings:
     probe_graphs_in_export: bool = True
     probe_markers_in_export: bool = True
     source_markers_in_export: bool = False
+    labels_in_export: bool = True           # names of parts, sources and probes in exported frames (this port)
 
 
 @dataclass
@@ -421,6 +422,7 @@ APP_SETTINGS = (("sim", "split_wavelengths", "SplitWavelengths"), ("display", "g
                 ("display", "true_colour", "TrueColour"), ("display", "nm_per_px", "NmPerPixel"),
                 ("display", "layer", "Layer"), ("display", "arrangement", "Arrangement"),
                 ("display", "handles", "HandlesInPreview"), ("display", "labels", "LabelsInPreview"),
+                ("display", "labels_in_export", "LabelsInExport"),
                 ("sim", "preview", "PreviewResolution"), ("sim", "preview_frames", "PreviewFrames"))
 
 

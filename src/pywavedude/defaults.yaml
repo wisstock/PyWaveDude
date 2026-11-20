@@ -90,6 +90,7 @@ new_project:
     export_to: 0                        # To step
     probe_graphs_in_export: true        # Probe graphs in the export
     probe_markers_in_export: true       # Probe markers in the export
+    labels_in_export: true              # Names of parts, sources and probes in the export
     source_markers_in_export: false     # Source markers in the export
   sources:                           # the sources a new project starts with
     - name: Source 1

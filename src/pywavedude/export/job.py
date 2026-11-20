@@ -71,7 +71,7 @@ class ExportSpec:
     fps: int = 60
     quality: int = 85
     still: bool = False
-    decor: dict | None = None       # probes, numbers, graphs, markers, sources, seed, total_steps
+    decor: dict | None = None       # probes, numbers, graphs, markers, sources, labels, group_colours, seed, total_steps
 
 
 @dataclass
@@ -188,7 +188,8 @@ class ExportJob:
         return decorate(rgb, probes=dec.get("probes") or [], numbers=dec.get("numbers") or [], traces=traces,
                         profiles=self.profiles, step=step, total_steps=dec.get("total_steps", 0),
                         graphs=bool(dec.get("graphs")) and self.collector is not None,
-                        probe_markers=bool(dec.get("markers")), sources=dec.get("sources") or [])
+                        probe_markers=bool(dec.get("markers")), sources=dec.get("sources") or [],
+                        labels=dec.get("labels") or [], group_colours=dec.get("group_colours") or [])
 
     @staticmethod
     def _colours(eng, layer: ExportLayer) -> np.ndarray:

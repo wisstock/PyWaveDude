@@ -342,8 +342,9 @@ def group_graph_data(trace, step: int) -> list[GraphData]:
 
 
 # ====================================================================== Pillow painter (exports)
-def draw_graph(img, g: GraphLayout, ox: int, oy: int) -> None:
-    """Draw a laid-out graph box into a Pillow RGBA image at (ox, oy)."""
+def draw_graph(img, g: GraphLayout, ox: int, oy: int, extra_colours=()) -> None:
+    """Draw a laid-out graph box into a Pillow RGBA image at (ox, oy); ``extra_colours``: one RGBA per
+    ``g.extra`` curve (a wavelength's share), drawn under the total."""
     from PIL import Image, ImageDraw
     w, h = int(round(g.width)), int(round(g.height))
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -367,15 +368,17 @@ def draw_graph(img, g: GraphLayout, ox: int, oy: int) -> None:
                 lx = min(max(pos - lw_ / 2, EDGE_PAD), max(EDGE_PAD, w - lw_ - EDGE_PAD))
                 dr.text((lx, bottom + 2), label, font=f, fill=LABEL)
         dr.rectangle([left, top, right, bottom], outline=FRAME)
-        if len(g.curve):
+        curves = [(c, col, 0.8) for c, col in zip(g.extra, extra_colours)] + [(g.curve, CURVE, 1.0)]
+        if any(len(c) for c, _, _ in curves):
             clip = Image.new("RGBA", (w, h), (0, 0, 0, 0))
             cd = ImageDraw.Draw(clip)
-            pts = [tuple(p) for p in g.curve]
-            if len(pts) == 1:
-                x, y = pts[0]
-                cd.ellipse([x - 2, y - 2, x + 2, y + 2], fill=CURVE)
-            else:
-                cd.line(pts, fill=CURVE, width=max(1, round(g.line_width)), joint="curve")
+            for curve, col, k in curves:
+                pts = [tuple(p) for p in curve]
+                if len(pts) == 1:
+                    x, y = pts[0]
+                    cd.ellipse([x - 2, y - 2, x + 2, y + 2], fill=col)
+                elif pts:
+                    cd.line(pts, fill=col, width=max(1, round(k * g.line_width)), joint="curve")
             box = (int(left), int(top), int(math.ceil(right)) + 1, int(math.ceil(bottom)) + 1)
             layer.alpha_composite(clip.crop(box), dest=box[:2])
     rw = 0.0
@@ -414,6 +417,23 @@ def draw_probe_marker(dr, p: Probe, number: int, h: int) -> None:
                 stroke_width=2, stroke_fill=(0, 0, 0, 255))
 
 
+def draw_labels(dr, labels, h: int) -> None:
+    """Objects' names below and right of their points, white with a dark outline; a label that would overlap
+    one already drawn moves down a line."""
+    arm, f = _arm(h), _marker_font(h)
+    step = round(f.size * 1.25)
+    taken = []
+    for x, y, text in labels:
+        if not text:
+            continue
+        lx, ly = x + arm + 2, y + arm // 2
+        w = dr.textlength(text, font=f)
+        while any(lx < bx1 and lx + w > bx0 and ly < by1 and ly + step > by0 for bx0, by0, bx1, by1 in taken):
+            ly += step
+        taken.append((lx, ly, lx + w, ly + step))
+        dr.text((lx, ly), text, font=f, fill=(255, 255, 255, 255), stroke_width=2, stroke_fill=(0, 0, 0, 255))
+
+
 def draw_source_marker(dr, x: int, y: int, h: int) -> None:
     r = _arm(h)
     for colour, width in (((0, 0, 0, 255), 4), ((255, 255, 255, 255), 2)):
@@ -421,10 +441,13 @@ def draw_source_marker(dr, x: int, y: int, h: int) -> None:
 
 
 def decorate(rgb: np.ndarray, *, probes=(), numbers=(), traces=(), profiles=None, step: int = 0,
-             total_steps: int = 0, graphs: bool = True, probe_markers: bool = True, sources=()) -> np.ndarray:
-    """An exported frame with the probe graph boxes, probe markers and source markers drawn in."""
+             total_steps: int = 0, graphs: bool = True, probe_markers: bool = True, sources=(), labels=(),
+             group_colours=()) -> np.ndarray:
+    """An exported frame with the probe graph boxes, probe markers, source markers and name labels
+    (``labels``: (x, y, text)) drawn in; ``group_colours``: RGBA per wavelength for intensity probes' per-colour
+    curves (a run with separate wavelengths), empty for none."""
     from PIL import Image, ImageDraw
-    if not ((graphs or probe_markers) and probes) and not sources:
+    if not ((graphs or probe_markers) and probes) and not sources and not labels:
         return rgb
     h, w = rgb.shape[:2]
     img = Image.fromarray(rgb).convert("RGBA")
@@ -438,5 +461,10 @@ def decorate(rgb: np.ndarray, *, probes=(), numbers=(), traces=(), profiles=None
         for i, p in enumerate(probes):
             bx, by, bw, bh = p.box(w, h)
             prof = profiles[i] if profiles is not None and i < len(profiles) else None
-            draw_graph(img, layout(p, graph_data(traces[i], step, prof), total_steps, bw, bh), bx, by)
+            groups = group_graph_data(traces[i], step) if group_colours else []
+            if len(groups) != len(group_colours):
+                groups = []
+            draw_graph(img, layout(p, graph_data(traces[i], step, prof), total_steps, bw, bh, groups), bx, by,
+                       group_colours[:len(groups)])
+    draw_labels(ImageDraw.Draw(img), labels, h)
     return np.asarray(img.convert("RGB"))
