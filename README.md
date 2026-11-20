@@ -53,6 +53,7 @@ First steps:
 | Model | scalar 2D wave equation, explicit leapfrog finite differences |
 | Laplacian | 9-point stencil, or 4th-order with automatic sub-stepping |
 | Units | 1 grid cell = 1 pixel, 1 time step; wave speed in a medium = 1/n |
+| Wavelength scale | *Wavelength at frequency 100 (px)* in the Simulation settings sets the source frequency scale: every wavelength ∝ 1 / (frequency × scale) |
 | Edges | open (absorbing) or reflective; optional damping rim inside or outside the canvas |
 | Intensity | running two-stage low-pass of the squared field, time constant set by the slowest source |
 | Backends | `cpu`: multithreaded JIT kernels, any OS · `mlx`: Metal GPU, Apple Silicon |
@@ -81,7 +82,7 @@ Scene image channels:
 
 | Setting | Values |
 |---|---|
-| Frequency level | 0.01–255 (wavelength shown in pixels) |
+| Frequency level | 0.01–255; or *Wavelength (px)* beside it, which sets the frequency |
 | Amplitude, phase | 0–100 %, −180…180° |
 | Emission | continuous · pulsed (Gaussian or smoothed square, pulse/off width in cycles) |
 | Detach step | stop driving the cell after a given step |
@@ -103,6 +104,9 @@ Scene image channels:
 
 Common part settings: position, rotation, mirror or glass, refractive index, anti-reflection coating (layer or
 graded, per face), absorption with ramp. Edges are anti-aliased.
+
+Wavelength-designed parts (zone plate, meta surfaces, gates, phase step plate) take a *Design wavelength (px)* beside
+their design frequency.
 
 Lens read-out: edge thickness, fitted radii, effective and back focal length (thick-lens lensmaker's formula from
 the fitted radii, in the blank canvas's background index; Fresnel lens as thin).
