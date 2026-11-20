@@ -64,10 +64,9 @@ LIST_HINTS = {
 
 # --------------------------------------------------------------------- read-outs
 def readouts(obj, medium: float = 1.0) -> list[str]:
-    from .engine.sources import PointSource, wavelength
+    from .engine.sources import PointSource
     out = []
     if isinstance(obj, PointSource):
-        out.append(f"Wavelength {wavelength(obj.level):.1f} px at the default frequency scale")
         if obj.composite:
             out.append(f"{obj.size_x * obj.size_y} emitters")
     if isinstance(obj, m.LensPart):
@@ -112,6 +111,74 @@ def readouts(obj, medium: float = 1.0) -> list[str]:
     return out
 
 
+@dataclasses.dataclass(frozen=True)
+class FieldMetaLike:
+    label: str
+    hint: str = ""
+
+
+# --------------------------------------------------------------------- computed fields
+@dataclasses.dataclass(frozen=True)
+class Computed:
+    """A field shown in a form but stored in another one: ``get(obj)`` reads it, ``set(obj, v)`` writes the real
+    field (named by ``writes``, which is what ``on_change`` hears); shown after the field ``after``."""
+    name: str
+    label: str
+    hint: str
+    after: str
+    writes: str
+    get: Callable
+    set: Callable
+    fmt: str = "%.2f"
+
+
+def _lambda_of(level: float, scale: float) -> float:
+    from .engine.sources import wavelength
+    return wavelength(level, scale)
+
+
+def _level_for(lam: float, scale: float, lo: float = 0.01, hi: float = 255.0) -> float:
+    """The frequency level whose wavelength is ``lam`` pixels (wavelength ∝ 1 / (level · scale))."""
+    if not lam > 0:
+        raise ValueError(lam)
+    return min(hi, max(lo, round(_lambda_of(1.0, scale) / lam, 4)))
+
+
+REFERENCE_LEVEL = 100.0
+
+
+def _scale_for(lam: float) -> float:
+    """The source frequency scale that gives frequency 100 a wavelength of ``lam`` pixels."""
+    if not lam > 0:
+        raise ValueError(lam)
+    return round(_lambda_of(REFERENCE_LEVEL, 1.0) / lam, 6)
+
+
+def computed_fields(obj, frequency_scale: float) -> list[Computed]:
+    """The wavelength in pixels beside every frequency: of a source, a wavelength-designed part, and of the
+    simulation's reference level (the source frequency scale)."""
+    from .engine import PointSource
+    from .project import SimSettings
+    if isinstance(obj, PointSource):
+        return [Computed("_wavelength", "Wavelength (px)", "Wavelength of this source in pixels at the simulation's "
+                         "frequency scale; typing it sets the frequency.", "level", "level",
+                         lambda o: _lambda_of(o.level, frequency_scale),
+                         lambda o, v: setattr(o, "level", _level_for(v, frequency_scale)))]
+    if isinstance(obj, SimSettings):
+        return [Computed("_wavelength", f"Wavelength at frequency {REFERENCE_LEVEL:g} (px)",
+                         "The wavelength in pixels of a source at frequency 100; typing it sets the source frequency "
+                         "scale, which scales every source's wavelength alike (λ ∝ 1 / (frequency × scale)).",
+                         "source_frequency_scale", "source_frequency_scale",
+                         lambda o: _lambda_of(REFERENCE_LEVEL, o.source_frequency_scale),
+                         lambda o, v: setattr(o, "source_frequency_scale", _scale_for(v)))]
+    if hasattr(obj, "design_frequency") and hasattr(obj, "frequency_scale"):
+        return [Computed("_wavelength", "Design wavelength (px)", "The wavelength the part is made for, in pixels; "
+                         "typing it sets the design frequency.", "design_frequency", "design_frequency",
+                         lambda o: _lambda_of(o.design_frequency, o.frequency_scale),
+                         lambda o, v: setattr(o, "design_frequency", _level_for(v, o.frequency_scale)))]
+    return []
+
+
 # --------------------------------------------------------------------- editor
 LABEL_WIDTH = 0.42          # share of the form's width for the labels
 
@@ -125,8 +192,10 @@ class Editor:
 
     def __init__(self, obj, parent, on_change: Callable[[str], None], *, medium: Callable[[], float] = lambda: 1.0,
                  choices: Callable[[object, str], list | None] = lambda o, n: None,
-                 extras: Callable[[object], None] = lambda o: None, hidden: set = frozenset()):
+                 extras: Callable[[object], None] = lambda o: None, hidden: set = frozenset(),
+                 computed: Callable[[object], list] = lambda o: []):
         self.obj, self.parent, self.on_change = obj, parent, on_change
+        self.computed = computed
         self.medium, self.choices, self.extras, self.hidden = medium, choices, extras, set(hidden)
         self.widgets: dict[str, int] = {}
         self.readout_ids: list[int] = []
@@ -163,9 +232,13 @@ class Editor:
                 with dpg.collapsing_header(label=f"About: {getattr(o, 'stem', '')}", default_open=False):
                     dpg.add_text(desc, wrap=0, color=(170, 175, 185))
             groups: dict[str, list] = {}
+            extra = {c.after: c for c in self.computed(o)}
             for n in self._shown:
                 fm = field_meta(o, n)
                 groups.setdefault(fm.category, []).append((n, fm))
+                if n in extra:
+                    c = extra[n]
+                    groups[fm.category].append((c, FieldMetaLike(c.label, c.hint)))
             for cat in sorted(groups, key=category_rank):
                 dpg.add_text(cat, color=(120, 170, 230))
                 with dpg.table(header_row=False, borders_innerH=False, policy=dpg.mvTable_SizingStretchProp):
@@ -177,7 +250,10 @@ class Editor:
                             if fm.hint:
                                 with dpg.tooltip(t):
                                     dpg.add_text(fm.hint, wrap=360)
-                            self.widgets[n] = self._control(n, getattr(o, n), fm.hint)
+                            if isinstance(n, Computed):
+                                self.widgets[n.name] = self._computed_control(n)
+                            else:
+                                self.widgets[n] = self._control(n, getattr(o, n), fm.hint)
             if isinstance(o, m.LensPart):
                 dpg.add_button(label="Flip concave / convex", callback=lambda: (o.flip(), self.on_change("r1"),
                                                                                   self.refresh()))
@@ -186,6 +262,16 @@ class Editor:
             self._readouts()
         finally:
             dpg.pop_container_stack()
+
+    def _computed_control(self, c: Computed):
+        def f(_s, v, _u=None):
+            try:
+                c.set(self.obj, float(v))
+            except Exception:
+                return
+            self.on_change(c.writes)
+
+        return dpg.add_input_float(default_value=c.get(self.obj), width=-1, format=c.fmt, step=0, callback=f)
 
     def _control(self, name, value, hint):
         o = self
@@ -235,8 +321,14 @@ class Editor:
             return
         from .ui_meta import enum_label
         o = self.obj
+        comp = {c.name: c for c in self.computed(o)}
         for n, w in self.widgets.items():
             if not dpg.does_item_exist(w) or dpg.is_item_active(w):
+                continue
+            if n in comp:
+                v = comp[n].get(o)
+                if abs(dpg.get_value(w) - v) > 1e-6 * max(1.0, abs(v)):
+                    dpg.set_value(w, v)
                 continue
             v = getattr(o, n)
             opts = self.choices(o, n)

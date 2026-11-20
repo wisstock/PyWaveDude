@@ -71,3 +71,9 @@ def test_every_field_has_a_label():
     assert "lens" in kind_description(m.LensPart()).lower()
     assert field_meta(m.LensPart(), "r1").hint                    # the original's description
     assert field_meta(PointSource(0, 0), "level").label == "Frequency"
+    from pywavedude.ui_props import computed_fields                   # wavelength in px beside every frequency
+    src, sim = PointSource(0, 0), pj.SimSettings()
+    computed_fields(src, 2.0)[0].set(src, 25.0)
+    computed_fields(sim, 2.0)[0].set(sim, 20.0)
+    assert computed_fields(src, 2.0)[0].get(src) == pytest.approx(25.0, rel=1e-4)
+    assert computed_fields(sim, 2.0)[0].get(sim) == pytest.approx(20.0, rel=1e-4)

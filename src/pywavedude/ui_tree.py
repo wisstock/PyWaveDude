@@ -18,7 +18,7 @@ from .parts import model as pm
 from .probes import Probe
 from .render import ColorScheme, builtin_schemes
 from .ui_meta import kind_description
-from .ui_props import Editor
+from .ui_props import Editor, computed_fields
 from . import ui_theme as th
 
 # the Add part menu: groups of kinds, as in the original
@@ -344,7 +344,8 @@ class TreeMixin:
             hidden |= {"image_name", "image_path"}
         self._editor = Editor(obj, "props_body", lambda name: self._prop_changed(obj, name),
                               medium=self._medium, choices=self._field_choices, extras=self._form_extras,
-                              hidden=hidden)
+                              hidden=hidden,
+                              computed=lambda o: computed_fields(o, self.p.sim.source_frequency_scale))
 
     def _medium(self) -> float:
         s = self.p.scene
