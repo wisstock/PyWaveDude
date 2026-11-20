@@ -123,7 +123,12 @@ class DialogsMixin:
                             dpg.add_text(_inline(row[c]) if c < len(row) else "", wrap=0)
             table.clear()
 
+        skip = False                     # the file's own contents list: the pane on the left replaces it
         for line in text.splitlines():
+            if line.startswith("#"):
+                skip = line.strip("# ").lower() == "contents"
+            if skip:
+                continue
             if line.startswith("```"):
                 flush_table()
                 in_code = not in_code

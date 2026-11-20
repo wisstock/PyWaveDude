@@ -3,11 +3,28 @@
 Python port of [WaveDude Next](https://github.com/wavedudenext/WaveDudeNext) (Alexander Gräf, Huygens Optics),
 including its colour schemes and project file format: a 2D wave optics simulator.
 
+## Contents
+
+- [Installation](#installation)
+- [Running](#running)
+- [Workflow](#workflow)
+- [Simulation](#simulation)
+- [Scene](#scene)
+- [Sources](#sources)
+- [Optical parts](#optical-parts)
+- [Probes](#probes)
+- [Display](#display)
+- [Interface](#interface)
+- [Controls](#controls)
+- [Export](#export)
+- [Projects](#projects)
+- [Defaults](#defaults)
+- [Benchmark](#benchmark)
+- [License](#license)
+
 ## Installation
 
-Requirements:
-
-| Item | Version | Notes |
+| Requirement | Version | Notes |
 |---|---|---|
 | [uv](https://docs.astral.sh/uv/) | any recent | creates the environment |
 | Python | ≥ 3.11 | installed by uv if missing |
@@ -21,93 +38,76 @@ uv sync
 
 Installed packages: `numpy`, `numba`, `pillow`, `dearpygui`, `pyyaml`, and `mlx` on Apple Silicon only.
 
-## Quick start
+## Running
 
 ```bash
-uv run pywavedude                         # new project, blank canvas
-uv run pywavedude scene.png               # new project on a scene image
-uv run pywavedude project.wdproj          # open a saved project
-uv run pywavedude examples/sted.wdproj    # example: STED focus with a phase step plate, true colour
-uv run pywavedude examples/dichroic.wdproj  # example: dichroic mirror splitting two wavelengths
-uv run pywavedude --backend cpu           # force a compute backend: auto | cpu | mlx
-uv run pywavedude --defaults my.yaml      # start with another defaults file
+uv run pywavedude [FILE] [--backend auto|cpu|mlx] [--defaults FILE]
 ```
 
-First steps:
-
-1. Nothing is computed at start. The default project has one point source on a 1920 × 1080 canvas.
-2. Project tree toolbar: **+ Source**, **+ Part ▼** (a kind from the menu) or **+ Probe ▼** → click the canvas.
-3. Click an object on the canvas or its row in the tree; its settings open in the Properties pane; drag it on the
-   canvas to move it, its handles to rotate or resize it.
-4. **Run** (F5): computes the simulation from step 0; the timeline returns to 0 and shades as frames are computed.
-5. **▶ Play** (Space): animates the computed frames; the same button pauses. Click or drag the timeline to scrub.
-6. An edit stops playback; when it is finished it becomes an undo step and, after a run, a new run starts from
-   step 0 with the timeline kept in place: the picture there updates once the new run reaches it
-   (switch: *Re-run automatically after edits*).
-7. **Stop** (Shift + F5): discards the computed simulation. **File → Export** saves a video.
-
-## Usage
-
-| Task | Steps |
+| Argument | Meaning |
 |---|---|
-| Set the canvas | **Scene**: width, height, background index; or **File → Open scene image** (index, emitters and absorption painted as colours) |
-| Set the wavelength scale | **Simulation → Wavelength at frequency 100 (px)**; keep the shortest wavelength ≥ ~8 px (≥ 20 px for thin-film parts) |
-| Make a plane wave | **+ Source**, then *Composite source* on, *Columns* 1, *Rows* N, *Vertical spacing* 2–4 px: a line of emitters radiating a beam to both sides |
-| Make a pulse | source *Mode* Pulsed, *Pulse width* / *Off width* in cycles |
-| Give a source a wavelength | source *Wavelength (px)* (sets *Frequency*) |
-| Add optics | **+ Part ▼** → kind → click the canvas; drag to move, lever to rotate, corner grip to resize; settings in **Properties** |
-| Mix wavelengths | sources of different frequencies; **Separate wavelengths** on (view row) for per-wavelength intensity, **True colour** to show them in colour |
-| Measure | **+ Probe ▼** → Point: one click; Line or detector: two clicks (A, B); graphs in the **Probe graphs** column |
-| Absorb at the canvas edge | **Scene**: *Edges* (open or reflective), *Damping edge* (rim width) |
-| Compute | **Run** (F5); edits after a run start a new run automatically |
-| Inspect | **Play** (Space), scrub the timeline, zoom (wheel) and pan (drag) the pictures, **Auto** brightness |
-| Save results | **File → Save** (`.wdproj`), **File → Export** (video, frames, EXR), **Export CSV** (probe data), **Save shown picture as PNG** |
+| `FILE` | a project (`.wdproj`) or a scene image (PNG, BMP, JPEG, TIFF, GIF); none: a new project on a blank canvas |
+| `--backend` | compute backend: `auto` (GPU where available), `cpu`, `mlx` |
+| `--defaults` | another defaults file instead of the bundled one |
 
-## Features
+Example projects: **File → Examples**.
 
-### Simulation
+## Workflow
+
+| Step | Action |
+|---|---|
+| Canvas | **Scene**: width, height, background index; or **File → Open scene image** |
+| Wavelength scale | **Simulation → Wavelength at frequency 100 (px)**; shortest wavelength ≥ ~8 px (≥ 20 px for thin-film parts) |
+| Objects | **+ Source**, **+ Part ▼**, **+ Probe ▼** in the project tree → click the canvas |
+| Editing | click an object (canvas or tree) → **Properties**; drag to move, lever to rotate, corner grip to resize |
+| Run | **Run** (F5): computes from step 0; the timeline shades as frames are computed |
+| Playback | **▶ Play** (Space); click or drag the timeline to scrub |
+| Re-run | an edit stops playback; when finished it becomes an undo step and, after a run, a new run starts from step 0 with the timeline position kept (*Re-run automatically after edits*) |
+| Stop | **Stop** (Shift + F5): discards the computed simulation |
+| Results | **File → Save** (`.wdproj`), **File → Export** (video, frames, EXR, probe CSV), **Save shown picture as PNG** |
+
+## Simulation
 
 | Item | Description |
 |---|---|
 | Model | scalar 2D wave equation, explicit leapfrog finite differences |
 | Laplacian | 9-point stencil, or 4th-order with automatic sub-stepping |
 | Units | 1 grid cell = 1 pixel, 1 time step; wave speed in a medium = 1/n |
-| Wavelength scale | *Wavelength at frequency 100 (px)* in the Simulation settings sets the source frequency scale: every wavelength ∝ 1 / (frequency × scale) |
-| Edges | open (absorbing) or reflective; optional damping rim inside or outside the canvas |
+| Wavelength scale | *Wavelength at frequency 100 (px)* sets the source frequency scale: every wavelength ∝ 1 / (frequency × scale) |
 | Intensity | running two-stage low-pass of the squared field, time constant set by the slowest source |
+| Separate wavelengths | one simulation per source wavelength on the same scene; field = their sum, intensity kept per wavelength (incoherent between wavelengths, coherent within one) |
 | Backends | `cpu`: multithreaded JIT kernels, any OS · `mlx`: Metal GPU, Apple Silicon |
 | Determinism | every run from step 0 is reproducible (project seed for all random choices) |
-| Separate wavelengths | optional: one simulation per source wavelength on the same scene; field = their sum, intensity kept per wavelength (incoherent between wavelengths, coherent within one) |
+| Memory warning | before a run whose frames exceed the memory budget: halve resolution and/or frames, or run anyway |
 
-### Scene
+## Scene
 
-| Source | Description |
+| Setting | Description |
 |---|---|
 | Blank canvas | width, height, background refractive index (1.00–2.55) |
 | Scene image | PNG, BMP, JPEG, TIFF, GIF; embedded in the saved project |
-
-Grid (row under the transport buttons, Display settings or View menu): on/off (on by default), step in pixels
-(25 by default), opacity; object centres snap to grid lines and nodes
-(switchable). Shown on the preview only, never exported.
+| Edges | open (absorbing) or reflective |
+| Damping edge | absorbing rim inside or outside the canvas |
+| Image sources | green pixels of the image emit (*Image source amplitude*) |
 
 Scene image channels:
 
 | Channel | Meaning |
 |---|---|
 | Red | refractive index × 100 (100 = vacuum, 150 = glass); 0 = mirror |
-| Green | emitter; value = frequency level (used when *Image sources* is on) |
+| Green | emitter; value = frequency level |
 | Blue | absorption, 0–255 |
 
-### Sources
+## Sources
 
-| Type | How | Result |
+| Type | Setup | Result |
 |---|---|---|
 | Point | default source | circular wave |
 | Line / plane wave | *Composite*: 1 column × N rows, spacing 2–4 px | beam along ±x, width N × spacing |
-| Array | *Composite*: columns × rows, spacings, *Rotation* | phased array, grating of emitters, rotated beam |
-| Random / incoherent | *Composite* + random spread | partially coherent light, speckle |
+| Array | *Composite*: columns × rows, spacings, *Rotation* | phased array, rotated beam |
+| Random / incoherent | *Composite* + randomisation | partially coherent light, speckle |
 | Pulsed | *Mode* Pulsed | wave packets |
-| Image sources | green channel of a scene image, *Image sources* on in Scene (*Image source amplitude*) | emitters of any shape |
+| Image sources | green channel of a scene image | emitters of any shape |
 
 | Setting | Values | Meaning |
 |---|---|---|
@@ -123,11 +123,11 @@ Scene image channels:
 | Columns, Rows | count | array size |
 | Horizontal / vertical spacing | px | emitter distance |
 | Rotation | degrees | array angle |
-| Randomisation: Frequency, Phase, Off width, Position | ± level, °, cycles, px; 0 = off | per-emitter spread (seeded by the project seed) |
+| Randomisation: Frequency, Phase, Off width, Position | ± level, °, cycles, px; 0 = off | per-emitter spread (project seed) |
 
-### Optical parts
+## Optical parts
 
-Common settings:
+### Common settings
 
 | Setting | Meaning |
 |---|---|
@@ -138,15 +138,20 @@ Common settings:
 | Anti-reflection coating | band width in px, profile *Layer* (band of index √n) or *Graded*; front / back / sides on or off |
 | Absorption, Absorption ramp | 0–255 absorption of the body, reached over a ramp in px from the surface |
 
+Edges are anti-aliased. Wavelength-designed parts (zone plate, meta surfaces, gates, phase step plate, dichroic
+mirror) show a *Design wavelength (px)* beside their design frequency; typing it sets the frequency.
+
+### Catalogue
+
 | Group | Part | Main settings |
 |---|---|---|
-| Lenses and mirrors | Lens | Diameter, R1, R2 (sign = convex / concave; *Flip* button), Centre thickness; read-out: edge thickness, fitted radii, focal and back focal length |
+| Lenses and mirrors | Lens | Diameter, R1, R2 (sign = convex / concave; *Flip* button), Centre thickness |
 | | Fresnel lens | lens settings + Zones, Zone division (EqualWidth, EqualDepth) |
 | | GRIN lens | Length, Diameter, Centre index, Edge index (parabolic profile) |
 | Shapes | Rectangle, Ellipse | Length, Width |
 | | Polygon | Number of sides, Side length |
 | | Triangle | Base, Type (Equilateral, RightIsosceles, ThirtySixtyNinety, Isosceles, Custom), Angle A, Angle B |
-| | Outline | Points (drag them on the canvas) |
+| | Outline | Points (dragged on the canvas) |
 | Waveguides | Fibre | Core index, Core diameter, Cladding index, Cladding thickness, Ends (Flat, Round), Nodes with Bézier handles, cladding absorption |
 | Layers | Bragg reflector | Layer pairs, Thickness 1/2, Index 1/2, Width |
 | | Interference filter | Length, Width, Layers (`thickness@index; …`, front to back) |
@@ -161,11 +166,20 @@ Common settings:
 | Phase plates | Phase step plate | Aperture, Base thickness, Zones, Phase step, Design frequency, Medium index; 2 zones × 180° = 2D vortex plate (dark on-axis focus, STED depletion) |
 | Logic gates | XOR, AND, OR gate | Design frequency, Core index, Cladding index, Port spacing, AR on input / output side, Upper / Lower output |
 
-Wavelength-designed parts (zone plate, meta surfaces, gates, phase step plate, dichroic mirror) show a
-*Design wavelength (px)* beside their design frequency; typing it sets the frequency. Lens focal lengths use the
-thick-lens lensmaker's formula in the blank canvas's background index (Fresnel lens as thin).
+### Read-outs
 
-#### Dichroic mirror
+| Part | Read-out |
+|---|---|
+| Lens, Fresnel lens | edge thickness, fitted radii, focal and back focal length (thick-lens formula in the background index; Fresnel lens as thin) |
+| Zone plate | wavelength, number of zones |
+| Phase step plate | wavelength, step height, zone width |
+| Meta surfaces | wavelength, full-turn height, number of cells; axicon: line of focus |
+| Interference filter | stack thickness |
+| Bragg reflector | length |
+| Logic gates | wavelength, core width, coupler gap and length, port spacing, outputs |
+| Dichroic mirror | see below |
+
+### Dichroic mirror
 
 | Item | Description |
 |---|---|
@@ -175,12 +189,12 @@ thick-lens lensmaker's formula in the blank canvas's background index (Fresnel l
 | Longpass | reflects the band just below the cut-off, passes longer waves; periods H/2 L H/2 |
 | Shortpass | reflects the band just above the cut-off, passes shorter waves; periods L/2 H L/2 |
 | Band | reflects a band centred on the cut-off; periods H L |
-| Placement | a new mirror is rotated 45°: a beam travelling along +x meets the stack at 45°; the reflected beam leaves downwards (+y) |
+| Placement | new mirror rotated 45°: a beam along +x meets the stack at 45°, the reflected beam leaves along +y (down) |
 | Read-out | cut-off and band centre, reflected band in px and frequency levels, peak R, layer and stack thickness, R and T for every source (transfer-matrix method, s-polarisation), warning for layers under 2 px |
 
-### Probes
+## Probes
 
-| Type | Placed by | Output |
+| Type | Placement | Output |
 |---|---|---|
 | Point (field / intensity) | one click | field amplitude, intensity, or integrated intensity per step |
 | Line (A → B) | two clicks | field or intensity profile per frame, or integrated profile |
@@ -193,7 +207,7 @@ thick-lens lensmaker's formula in the blank canvas's background index (Fresnel l
 | Measurement | Amplitude, Value, IntegratedValue | raw field, value, or running sum |
 | Kind | Point, Line | point A, or the line A → B |
 | Detector | Standard, Counting, Imaging | plain probe or photon detector |
-| A x/y, B x/y | px | ends (drag them on the canvas) |
+| A x/y, B x/y | px | ends (dragged on the canvas) |
 | Start after step | step | ignore the start-up transient |
 | Detector sensitivity, Bin size | value, px | detection rate; imaging bin width |
 | Box size, Box x/y/width/height | Tiny … ExtraLarge, Custom | graph box on the canvas |
@@ -201,15 +215,26 @@ thick-lens lensmaker's formula in the blank canvas's background index (Fresnel l
 | Auto-scale steps / values, Value minimum / maximum | on/off, values | graph ranges |
 | Value axis, Decades | Linear / Logarithmic, count | value scale |
 
-- Live graphs: in the **Probe graphs** column at the right edge of the window (opens when a run with probes
-  starts; switch: *Graph column*), and optionally in boxes over the picture of the layer the probe measures (switch:
-  *Graphs on the canvas*, off by default; drag a box to move it, its corner grip to resize it).
-- Separate wavelengths: intensity probes (point and line, not detectors) show a curve per wavelength in its colour
-  beside the total (white); the curves add up to the total (switch: *Probe curves per colour*, Display settings).
-- Graph options: running window or full run, auto or fixed value range, linear or logarithmic scale.
-- **Export CSV** (File → Export): one row per step (point) or per frame (line), `;`-separated.
+| Graph | Description |
+|---|---|
+| Graph column | **Probe graphs** column at the right edge; opens when a run with probes starts (*Graph column*) |
+| Graphs on the canvas | boxes over the picture of the measured layer (*Graphs on the canvas*, off by default); drag to move, corner grip to resize |
+| Per-wavelength curves | with separate wavelengths, intensity probes (point and line) show each wavelength's share in its colour beside the total (*Probe curves per colour*) |
+| CSV | **File → Export → Probe data as CSV**: one row per step (point) or per frame (line), `;`-separated |
 
-### Interface
+## Display
+
+| Item | Description |
+|---|---|
+| Pictures | field, intensity or both; stacked or side by side; each a panel with a header |
+| Colour | 23 colour schemes plus project schemes; brightness, black level, **Auto** brightness |
+| True colour | with separate wavelengths: each wavelength through a black-to-colour ramp, added like light; colours from the wavelength (shortest 450 nm … longest 650 nm, or a set nm per px); colour key above the intensity panel |
+| Grid | on by default, step 25 px, opacity; object centres snap to lines and nodes (*Snap*); never exported |
+| Markers | part outlines, source / part / probe markers and labels; handles of every object or of the selected one only |
+| Preview | resolution full, half, quarter; frames kept: every 1st, 2nd or 4th |
+| Playback | export frame rate × speed (0.25–8); loop over the export range |
+
+## Interface
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -232,63 +257,82 @@ thick-lens lensmaker's formula in the blank canvas's background index (Fresnel l
 | Element | Description |
 |---|---|
 | Project tree | Project (seed, description), Scene, Simulation, Display; groups Sources, Optical parts, Probes, Colour schemes; per row: Enabled, move up/down, remove |
-| Selection | click; Ctrl/Cmd + click toggles; Shift + click a range in the tree / adds on the canvas; drag on empty canvas = marquee; Ctrl/Cmd + A all |
-| Properties | form of the current object: labels, categories, a hint on every label, kind description for parts; values apply as you type |
-| Picture header | layer, step, brightness box, **Auto** (fits the brightness to the frame shown) |
+| Properties | form of the current object: categories, a hint on every label, kind description for parts, read-outs; values apply as you type |
+| Picture header | layer, step, brightness box, **Auto** |
 | Picture frame | red: reflective edges; blue: damping rim outside the canvas; grey: open edges |
-| Handles | selected object: rotation lever (Shift: 15° steps), corner grip (size), lens surface handles (radii), outline points, fibre nodes and Bézier handles, probe ends, graph box grip |
-| Timeline | ticks in frames; computed part shaded; in/out brackets = export range (drag them); playhead |
+| Handles | rotation lever (Shift: 15° steps), corner grip (size), lens surface handles (radii), outline points, fibre nodes and Bézier handles, probe ends, graph box grip |
+| Timeline | ticks in frames; computed part shaded; in/out brackets = export range; playhead |
 | Transport | Run, Pause/Resume run, Stop, Play/Pause, frame back/forward, In, Out, Clear, Loop, Live (follow the newest frame), position (frame and step), speed, shown layers, arrangement |
-| View row (under the transport) | Zoom −, zoom %, +, Fit; Grid, grid step, Snap, grid opacity; Graphs on the canvas, Graph column; Separate wavelengths, True colour |
-| Canvas zoom | 100 % (whole canvas) to 3200 %, both pictures together; wheel / two-finger scroll zooms at the pointer (or pans, `app.canvas.wheel: pan`) |
-| Canvas pan | when zoomed: drag empty canvas (mouse or touchpad click-drag); anywhere: right or middle button drag, Alt + drag |
-| Undo / redo | unlimited; an edit becomes a step when it has finished (mouse released, field left) |
+| View row | Zoom −, zoom %, +, Fit; Grid, grid step, Snap, grid opacity; Graphs on the canvas, Graph column; Separate wavelengths, True colour |
+| Canvas zoom | 100 % (whole canvas) to 3200 %, both pictures together; wheel zooms at the pointer (or pans: `app.canvas.wheel: pan`) |
+| Canvas pan | zoomed: drag empty canvas; anywhere: right or middle drag, Alt + drag |
+| Selection | click; Ctrl/Cmd + click toggles; Shift + click: range in the tree, add on the canvas; marquee on empty canvas; Ctrl/Cmd + A all |
+| Undo / redo | unlimited; an edit becomes a step when finished (mouse released, field left) |
 | Clipboard | cut, copy, paste, duplicate of sources, parts, probes and colour schemes, as XML text |
-| Colour schemes | project schemes from any scheme; gradient editor: click adds a stop, drag moves it, drag away or double-click removes it; colour and position fields |
-| Memory warning | before a run whose frames exceed half the memory: halve resolution and/or frames, or run anyway |
-| Status bar | last message (warnings yellow, errors red), what is being placed, run state and speed |
-
-Menus:
+| Colour schemes | project schemes from any scheme; gradient editor: click adds a stop, drag moves it, drag away or double-click removes it |
+| Status bar | last message (warnings yellow, errors red), object being placed, run state and speed |
 
 | Menu | Entries |
 |---|---|
-| File | New, Open, Recent projects (session), Examples, Save, Save as, Open scene image, Blank canvas, Export (field, intensity, both, probe data as CSV; the dialog also saves the shown frame), Export last, Save shown picture as PNG, Exit |
+| File | New, Open, Recent projects, Examples, Save, Save as, Open scene image, Blank canvas, Export (Field, Intensity, Both, Probe data as CSV), Export last, Save shown picture as PNG, Exit |
 | Edit | Undo, Redo, Cut, Copy, Paste, Duplicate, Delete, Select all |
-| View | Panes (project tree, properties, status bar, probe graphs), preview resolution, preview frames (every 1st/2nd/4th), UI zoom, canvas zoom in / out / whole canvas, grid, handles, labels, graphs on the canvas |
+| View | Panes (project tree, properties, status bar, probe graphs), preview resolution, preview frames, UI zoom, canvas zoom in / out / whole canvas, grid, handles, labels, graphs on the canvas |
 | Simulation | Run, Pause/resume run, Stop, Play/Pause, compute backend, re-run after edits, separate wavelengths, memory warning |
-| Help | Manual (this README), About (versions, GPU, system information to copy) |
+| Help | Manual (this file), About (versions, GPU, system information) |
 
-### Display
+## Controls
 
-- Layers: field, intensity or both; stacked or side by side; each a panel with its header.
-- 23 colour schemes plus project schemes; brightness, black level, auto brightness.
-- True colour intensity (*Separate wavelengths* and *True colour*: view row, Simulation menu, Display settings): each wavelength through a black-to-colour ramp, added like
-  light; colours from the wavelength (shortest 450 nm … longest 650 nm, or a set nm per pixel); colour key above
-  the intensity panel.
-- Part outlines, source / part / probe markers with labels; handles of every object or of the selected one only.
-- Preview resolution: full, half, quarter; preview frames: every 1st, 2nd or 4th kept.
-- Playback at the export frame rate × speed (0.25–8); loop over the export range.
+| Key / action | Function |
+|---|---|
+| F5 / Shift + F5 / F6 | Run / Stop / Pause or resume the run |
+| Space, F7 | Play / Pause |
+| `,` `.` | one frame back / forward |
+| I, O, X | in point, out point, clear the export range |
+| L, F | loop, live |
+| Ctrl/Cmd + N, O, S, Shift + S | new, open, save, save as |
+| Ctrl/Cmd + E | export last |
+| Ctrl/Cmd + Z, Y (Shift + Z) | undo, redo |
+| Ctrl/Cmd + X, C, V, D, A | cut, copy, paste, duplicate, select all |
+| Ctrl/Cmd + =, -, 0 | zoom in, zoom out, whole canvas |
+| F1 | manual |
+| Wheel / two-finger scroll | zoom at the pointer (wheel mode `pan`: scroll, Shift sideways, Ctrl/Cmd zooms) |
+| Drag on empty canvas | marquee; zoomed: pan (Shift or Ctrl/Cmd + drag: marquee) |
+| Right or middle drag, Alt + drag | pan |
+| Click / drag on an object | select / move (centres snap to the grid when *Snap* is on) |
+| Arrows (Shift: ×10), Tab | after a canvas click: nudge the selection, select the next object |
+| Del, Backspace | after a canvas click: remove the selected objects |
+| Click after **+ Source / Part / Probe** | place the object (lines and detectors: two clicks, A then B) |
+| Esc | cancel a drag, cancel placing, or clear the selection |
 
-### Export
+## Export
 
 | Format | Content |
 |---|---|
 | MP4 (H.264), MPEG-1 | video (needs ffmpeg) |
-| AVI | uncompressed video, no size limit |
+| AVI | uncompressed video |
 | QuickTime | Animation (lossless RLE) or PNG codec |
 | PNG / JPEG sequence | numbered frames in a folder |
 | OpenEXR | 16-bit float data, intensity as I or √I |
 
-Options: field / intensity / both, frame rate, quality, step range (the timeline's in/out points), part outlines,
-probe graphs (with the per-wavelength curves when *Probe curves per colour* is on), probe and source markers, labels
-(names of parts and sources; of probes when their graphs are not exported). **Export shown frame** saves a single full-resolution still. **Export last**
-(Ctrl/Cmd + E) repeats the session's last export without the dialog.
+| Option | Description |
+|---|---|
+| Layers | field, intensity, or both (one file each) |
+| Frame rate, Quality | video timing; compression quality (MP4, MPEG-1, JPEG) |
+| From / To step | export range (preset from the timeline's in/out points) |
+| Part outlines | glowing scene edges |
+| Probe graphs | graph boxes, with per-wavelength curves when *Probe curves per colour* is on |
+| Probe markers, Source markers | probe ends with numbers; a ring on every emitter |
+| Labels | names of parts and sources; of probes when their graphs are not exported |
+| Export shown frame | one full-resolution still of the current step |
+| Export last | the session's last export again, without the dialog (Ctrl/Cmd + E) |
 
-### Projects
+## Projects
 
-- File format: `.wdproj` (XML).
-- Stored: scene, embedded image, sources, parts, probes, display settings, custom colour schemes, random seed,
-  grid, true colour, layer and preview settings.
+| Item | Description |
+|---|---|
+| Format | `.wdproj` (XML) |
+| Stored | scene and embedded image, sources, parts, probes, simulation and display settings, colour schemes, random seed |
+| Missing attributes | read as the format's defaults |
 
 ## Defaults
 
@@ -304,35 +348,11 @@ existing setting; an unknown key or a wrong value stops the start with the key's
 | `app.run` | memory warning on/off, memory budget as a share of the physical memory |
 | `app.export` | file name, format (`MP4`, `MPEG1`, `AVI`, `MOV`, `MOV_PNG`, `PNG`, `JPEG`, `EXR`, `EXR_ROOT`), layers, part outlines |
 | `new_project.scene` / `.simulation` / `.display` | every setting of a new project |
-| `new_project.sources` | the sources a new project starts with (list of source settings with `name`, `x`, `y`) |
+| `new_project.sources` | sources of a new project (list of source settings with `name`, `x`, `y`) |
 | `new_objects.source`, `.probe` | settings of a newly placed source or probe |
-| `new_objects.parts.<Kind>` | settings of a newly placed part, per kind (`LensPart`, `RectanglePart`, …) |
+| `new_objects.parts.<Kind>` | settings of a newly placed part, per kind (`LensPart`, `DichroicMirrorPart`, …) |
 
-Values in a saved project are its own; an attribute a `.wdproj` file leaves out keeps the project format's default.
-
-## Controls
-
-| Key / action | Function |
-|---|---|
-| F5 / Shift + F5 / F6 | Run / Stop / Pause or resume the run |
-| Space, F7 | Play / Pause the animation of the computed frames |
-| `,` `.` | one frame back / forward |
-| I, O, X | in point, out point, clear the export range |
-| L, F | loop, live |
-| Ctrl/Cmd + N, O, S, Shift + S | new, open, save, save as |
-| Ctrl/Cmd + E | export last |
-| Ctrl/Cmd + Z, Y (Shift + Z) | undo, redo |
-| Ctrl/Cmd + X, C, V, D, A | cut, copy, paste, duplicate, select all |
-| F1 | manual |
-| Mouse wheel / two-finger scroll on a picture | zoom in / out at the pointer (wheel mode `pan`: scroll, Shift sideways, Ctrl/Cmd zooms) |
-| Drag on empty canvas (zoomed) | pan; Shift or Ctrl/Cmd + drag: marquee |
-| Right or middle drag, Alt + drag | pan |
-| Ctrl/Cmd + =, -, 0 | zoom in, zoom out, whole canvas |
-| Click / drag on canvas | select / move objects (centres snap to the grid when snapping is on); drag empty space for a marquee (zoomed: pans) |
-| Arrows (Shift: ×10), Tab | after a click on the canvas: nudge the selection, select the next object |
-| Del, Backspace | after a click on the canvas: remove the selected objects |
-| Click after **+ Source / Part / Probe** | place the new object (line probes and detectors: two clicks, A then B) |
-| Esc | cancel a drag (everything back), cancel placing, or clear the selection |
+Values in a saved project override these defaults.
 
 ## Benchmark
 
