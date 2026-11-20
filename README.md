@@ -252,7 +252,7 @@ Menus:
 
 | Menu | Entries |
 |---|---|
-| File | New, Open, Recent projects (session), Examples, Save, Save as, Open scene image, Blank canvas, Export (field, intensity, both, field frame, intensity frame, probe data as CSV), Export last, Save shown picture as PNG, Exit |
+| File | New, Open, Recent projects (session), Examples, Save, Save as, Open scene image, Blank canvas, Export (field, intensity, both, probe data as CSV; the dialog also saves the shown frame), Export last, Save shown picture as PNG, Exit |
 | Edit | Undo, Redo, Cut, Copy, Paste, Duplicate, Delete, Select all |
 | View | Panes (project tree, properties, status bar, probe graphs), preview resolution, preview frames (every 1st/2nd/4th), UI zoom, canvas zoom in / out / whole canvas, grid, handles, labels, graphs on the canvas |
 | Simulation | Run, Pause/resume run, Stop, Play/Pause, compute backend, re-run after edits, separate wavelengths, memory warning |

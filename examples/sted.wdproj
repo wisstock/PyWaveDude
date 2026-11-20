@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Version="4" Seed="1">
 	<Description>STED in 2D: the depletion beam (red, longer wavelength) passes a two-zone phase step plate and the objective, giving a focus with a dark zero on the axis around the excitation focus (blue). Wavelengths run separately; the intensity is shown in true colour.</Description>
-	<Scene Width="1800" Height="400" />
+	<Scene Width="1300" Height="700" />
 	<Simulation Steps="1400" />
 	<Display>
-		<Field ColorScheme="Default field" Brightness="22.922138469172474" BlackLevel="-0.05" />
-		<Intensity ColorScheme="Default intensity" Brightness="26.119070494077572" />
+		<Field ColorScheme="Default field" Brightness="7.474452554744525" BlackLevel="-0.05" />
+		<Intensity ColorScheme="Default intensity" Brightness="8.989209684935659" />
 	</Display>
-	<PyWaveDude SplitWavelengths="true" GraphsInPreview="true" Grid="true" GridStep="20" GridOpacity="0.11999999731779099" TrueColour="false" />
-	<Source Name="Source 1" X="420" Y="200" Frequency="160.2212">
-		<Array SizeX="5" SpacingY="4" />
+	<PyWaveDude SplitWavelengths="true" GraphsInPreview="true" GridStep="20" GridOpacity="0.11999999731779099" Layer="Intensity" />
+	<Source Name="Excitation laser" X="600" Y="640" Frequency="80.1106" Amplitude="75">
+		<Array SizeX="5" SizeY="3" SpacingX="20" SpacingY="3" Angle="90" />
 	</Source>
-	<Lens Name="Lens 1" X="640" Y="200" />
-	<Lens Name="Lens 2" X="840" Y="200" />
-	<PhaseStepPlate Name="Phase step plate 1" X="745" Y="200" Aperture="200" DesignFrequency="160.2212" />
-	<Probe Name="Probe 1" Layer="Intensity" Measurement="Value" Kind="Line" AX="1190" AY="60" BX="1190" BY="340" BoxSize="Custom" BoxX="980" BoxY="13" BoxWidth="190" BoxHeight="101" />
+	<Source Name="Depletion laser" X="80" Y="200" Frequency="53.4071">
+		<Array SizeX="5" SizeY="3" SpacingX="30" SpacingY="4" />
+	</Source>
+	<Lens Name="Collimator" X="300" Y="200" />
+	<Lens Name="Excitation collimator" X="600" Y="440" Angle="90" />
+	<Lens Name="Objective" X="800" Y="200" />
+	<PhaseStepPlate Name="Vortex plate" X="435" Y="200" Aperture="200" DesignFrequency="53.4071" />
+	<DichroicMirror Name="Dichroic mirror" X="615" Y="215" Angle="-45" FrontCoated="false" SidesCoated="false" Length="4" Width="393" DesignFrequency="72.8278" />
+	<Probe Name="Focal plane" Layer="Intensity" Measurement="Value" Kind="Line" AX="1160" AY="60" BX="1160" BY="340" BoxSize="Custom" BoxX="796" BoxY="359" BoxWidth="484" BoxHeight="323" />
 </Project>

@@ -65,7 +65,7 @@ class ExportMixin:
             dpg.add_text("", tag="exp_status", wrap=430)
         self._export_fmt_changed()
 
-    def _show_export(self, layers: str | None = None, still: bool | None = None):
+    def _show_export(self, layers: str | None = None):
         """The export window, with the layers preset (File > Export > Field / Intensity / Both)."""
         if isinstance(layers, str) and layers in LAYER_CHOICES:
             dpg.set_value("exp_layers", layers)
@@ -74,8 +74,6 @@ class ExportMixin:
         dpg.set_value("exp_to", d.export_to)
         dpg.show_item("export_win")
         dpg.focus_item("export_win")
-        if still:
-            self._start_export(still=True)
 
     def _export_last(self, *_):
         """The session's last run export again: same layers, format and file, no dialog."""
