@@ -23,7 +23,18 @@ cd PyWaveDude
 uv sync
 ```
 
-Installed packages: `numpy`, `numba`, `pillow`, `dearpygui`, `pyyaml`, and `mlx` on Apple Silicon only.
+Python packages (installed by `uv sync`):
+
+| Package | Version | Platform | Purpose |
+|---|---|---|---|
+| `numpy` | ≥ 1.26 | all | grids, scenes, frames |
+| `numba` (with `llvmlite`) | ≥ 0.60 | all | multithreaded JIT-compiled CPU kernels |
+| `pillow` | ≥ 10 | all | scene images, exported frames, graph and label drawing |
+| `dearpygui` | ≥ 2.0 | all | GUI |
+| `pyyaml` | ≥ 6.0 | all | defaults file |
+| `mlx` | ≥ 0.20 | macOS on Apple Silicon | Metal GPU backend |
+| `pytest` | ≥ 8 | all, development group | tests: `uv run pytest` |
+| `hatchling` | any | build only | package build backend |
 
 ## Running
 
