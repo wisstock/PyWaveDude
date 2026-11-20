@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+reference/
+*.egg-info/
+dist/
+tests/_tmp/
+.pytest_cache/
+
+AGENTS.md
+PORTING.md

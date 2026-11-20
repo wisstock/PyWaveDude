@@ -1,0 +1,1721 @@
+{
+ "classes": {
+  "BraggReflectorPart": {
+   "base": "OpticalPart",
+   "props": {
+    "Pairs": {
+     "category": "Layers",
+     "label": "Layer pairs",
+     "hint": "Number of layer pairs, 1 to 200.",
+     "min": 1.0,
+     "max": null
+    },
+    "Thickness1": {
+     "category": "Layers",
+     "label": "Thickness 1",
+     "hint": "Thickness of the first layer of each pair in pixels. A quarter-wave layer is λ / (4 n) pixels thick.",
+     "min": 1.0,
+     "max": null
+    },
+    "Thickness2": {
+     "category": "Layers",
+     "label": "Thickness 2",
+     "hint": "Thickness of the second layer of each pair in pixels. A quarter-wave layer is λ / (4 n) pixels thick.",
+     "min": 1.0,
+     "max": null
+    },
+    "Index1": {
+     "category": "Layers",
+     "label": "Index 1",
+     "hint": "Refractive index of the first layer of each pair, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "Index2": {
+     "category": "Layers",
+     "label": "Index 2",
+     "hint": "Refractive index of the second layer of each pair, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Extent of the stack across the axis in pixels.",
+     "min": 2.0,
+     "max": null
+    }
+   }
+  },
+  "CoatedPart": {
+   "base": "OpticalPart",
+   "props": {
+    "Coating": {
+     "category": "Material",
+     "label": "AR coating",
+     "hint": "Thickness in pixels of the anti-reflection band just inside the outline; 0 for none. A quarter-wave layer is λ / (4 √n) pixels thick, λ being the wavelength the source form shows; a graded band is the better the thicker, from a wavelength on.",
+     "min": 0.0,
+     "max": null
+    },
+    "CoatingProfile": {
+     "category": "Material",
+     "label": "Coating profile",
+     "hint": "How the index runs through the band: a layer at √n, the quarter-wave idea, or a graded rise from the medium outside to the glass. A graded band reflects less than a layer once it is a wavelength thick or more, at any wavelength; a layer only at the wavelength it is cut for.",
+     "min": null,
+     "max": null
+    },
+    "FrontCoated": {
+     "category": "Material",
+     "label": "Coat the front",
+     "hint": "Put the band on the front: the faces turned toward a source on the left, a lens's first surface. Clear it to leave them bare, as the inner faces of a cavity are.",
+     "min": null,
+     "max": null
+    },
+    "BackCoated": {
+     "category": "Material",
+     "label": "Coat the back",
+     "hint": "Put the band on the back: the faces turned away from a source on the left, a lens's second surface. Clear it to leave them bare.",
+     "min": null,
+     "max": null
+    },
+    "SidesCoated": {
+     "category": "Material",
+     "label": "Coat the sides",
+     "hint": "Put the band on the sides: the faces that are neither front nor back, a lens's rim, a slab's narrow ends. Clear it to leave them bare.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "DiffuserPart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Extent along the axis in pixels: the plate's thickness at the mean of its rough face.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Extent across the axis in pixels: the width of the rough face.",
+     "min": 2.0,
+     "max": null
+    },
+    "CenterWavelength": {
+     "category": "Roughness",
+     "label": "Centre wavelength",
+     "hint": "The spatial wavelength in pixels at the middle of the roughness's spectrum: the ripple along the face that has the full amplitude. Two pixels at least.",
+     "min": null,
+     "max": null
+    },
+    "Amplitude": {
+     "category": "Roughness",
+     "label": "Amplitude",
+     "hint": "The amplitude in pixels of the ripple at the centre wavelength. The other wavelengths of the spread get less, by their distance from the centre, and the face carries the sum of them all; 0 makes the face flat.",
+     "min": 0.0,
+     "max": null
+    },
+    "Sigma": {
+     "category": "Roughness",
+     "label": "Sigma",
+     "hint": "The spread of the roughness's wavelengths about the centre wavelength, in pixels: a wavelength gets the amplitude times the bell e^(−(λ − centre)² / 2σ²). 0 leaves the centre wavelength alone, a single regular ripple; the larger, the more wavelengths join in and the less regular the face.",
+     "min": 0.0,
+     "max": null
+    }
+   }
+  },
+  "Display": {
+   "base": "ObservableObject",
+   "props": {
+    "Field": {
+     "category": "Outputs",
+     "label": "Field",
+     "hint": "Rendering of the wave field.",
+     "min": null,
+     "max": null
+    },
+    "Intensity": {
+     "category": "Outputs",
+     "label": "Intensity",
+     "hint": "Rendering of the accumulated intensity.",
+     "min": null,
+     "max": null
+    },
+    "Video": {
+     "category": "Export",
+     "label": "Video",
+     "hint": "Encoder settings of exported videos.",
+     "min": null,
+     "max": null
+    },
+    "ExportFrom": {
+     "category": "Export",
+     "label": "From step",
+     "hint": "First simulation step of the exported range; 0 is the start of the run.",
+     "min": 0.0,
+     "max": null
+    },
+    "ExportTo": {
+     "category": "Export",
+     "label": "To step",
+     "hint": "Last simulation step of the exported range; 0 means the end of the run.",
+     "min": 0.0,
+     "max": null
+    },
+    "ProbeGraphsInExport": {
+     "category": "Export",
+     "label": "Probe graphs in the export",
+     "hint": "Draw the probes' graph boxes over exported frames and videos.",
+     "min": null,
+     "max": null
+    },
+    "ProbeMarkersInExport": {
+     "category": "Export",
+     "label": "Probe markers in the export",
+     "hint": "Draw the probes' positions (crosses, the line of a line probe, the number) over exported frames and videos.",
+     "min": null,
+     "max": null
+    },
+    "SourceMarkersInExport": {
+     "category": "Export",
+     "label": "Source markers in the export",
+     "hint": "Draw the enabled sources (the marker, a composite source's emitter dots, the name) over exported frames and videos.",
+     "min": null,
+     "max": null
+    },
+    "HandlesInPreview": {
+     "category": "Preview",
+     "label": "Handles in the preview",
+     "hint": "Show the handles, lines, emitter dots and levers of every source, part and probe over the preview pictures. A selected object shows its own either way.",
+     "min": null,
+     "max": null
+    },
+    "LabelsInPreview": {
+     "category": "Preview",
+     "label": "Labels in the preview",
+     "hint": "Show the names beside the handles over the preview pictures. A selected object shows its own either way.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "DisplayLayer": {
+   "base": "ObservableObject",
+   "props": {
+    "ColorScheme": {
+     "category": "Rendering",
+     "label": "Colour scheme",
+     "hint": "Name of the colour scheme mapped onto the values.",
+     "min": null,
+     "max": null
+    },
+    "Brightness": {
+     "category": "Rendering",
+     "label": "Brightness",
+     "hint": "Gain applied to the values before the colour lookup.",
+     "min": 0.0001,
+     "max": 100000.0
+    },
+    "BlackLevel": {
+     "category": "Rendering",
+     "label": "Black level",
+     "hint": "Offset applied before the colour lookup; values at or below it map to the first colour.",
+     "min": -10.0,
+     "max": 1.0
+    },
+    "Preview": {
+     "category": "Output",
+     "label": "Preview",
+     "hint": "Show this output in the live preview.",
+     "min": null,
+     "max": null
+    },
+    "Overlay": {
+     "category": "Scene outline",
+     "label": "Outline in the preview",
+     "hint": "Lay the scene image's glowing-edges outline over this output in the preview.",
+     "min": null,
+     "max": null
+    },
+    "OverlayGain": {
+     "category": "Scene outline",
+     "label": "Outline brightness",
+     "hint": "Multiplier of the outline: 1 as computed, higher lifts faint edges, 0 hides it.",
+     "min": 0.0,
+     "max": null
+    },
+    "OverlayInExport": {
+     "category": "Scene outline",
+     "label": "Outline in the export",
+     "hint": "Bake the outline into exported frames and videos of this output.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "Video": {
+   "base": "ObservableObject",
+   "props": {
+    "Fps": {
+     "category": "Video",
+     "label": "Frame rate",
+     "hint": "Frames per second of the exported video.",
+     "min": 1.0,
+     "max": null
+    },
+    "Quality": {
+     "category": "Video",
+     "label": "Quality",
+     "hint": "Encoder quality, 1 to 100.",
+     "min": 1.0,
+     "max": 100.0
+    }
+   }
+  },
+  "EllipsePart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Diameter along the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Diameter across the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    },
+    "Linked": {
+     "category": "Shape",
+     "label": "Linked",
+     "hint": "Keep the width equal to the length: a circle.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "FacettedGratingPart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Extent along the axis in pixels: the plate's thickness at the mean of its facetted face.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Extent across the axis in pixels: the width of the facetted face.",
+     "min": 2.0,
+     "max": null
+    },
+    "Pattern": {
+     "category": "Facets",
+     "label": "Pattern",
+     "hint": "The facets' shape over each pitch: a sawtooth, a ramp then a step; a square wave, a crest and a trough of half a pitch each; or a sinusoid.",
+     "min": null,
+     "max": null
+    },
+    "Pitch": {
+     "category": "Facets",
+     "label": "Pitch",
+     "hint": "The period of the facets across the face in pixels: the grating's pitch, which with the wavelength sets the diffraction angles. Two pixels at least.",
+     "min": null,
+     "max": null
+    },
+    "Amplitude": {
+     "category": "Facets",
+     "label": "Amplitude",
+     "hint": "The relief's height either side of the mean face in pixels: the facets run from this far out to this far in, twice it from crest to trough. 0 makes the face flat.",
+     "min": 0.0,
+     "max": null
+    }
+   }
+  },
+  "FiberNode": {
+   "base": "ObservableObject",
+   "props": {
+    "X": {
+     "category": "Node",
+     "label": "X",
+     "hint": "X relative to the part's centre in canvas pixels, before rotation.",
+     "min": null,
+     "max": null
+    },
+    "Y": {
+     "category": "Node",
+     "label": "Y",
+     "hint": "Y relative to the part's centre in canvas pixels, before rotation.",
+     "min": null,
+     "max": null
+    },
+    "InX": {
+     "category": "In handle",
+     "label": "In X",
+     "hint": "X of the in-handle relative to the node, in canvas pixels before rotation. It shapes the segment arriving from the previous node; zero makes that segment straight at this end.",
+     "min": null,
+     "max": null
+    },
+    "InY": {
+     "category": "In handle",
+     "label": "In Y",
+     "hint": "Y of the in-handle relative to the node, in canvas pixels before rotation.",
+     "min": null,
+     "max": null
+    },
+    "OutX": {
+     "category": "Out handle",
+     "label": "Out X",
+     "hint": "X of the out-handle relative to the node, in canvas pixels before rotation. It shapes the segment leaving to the next node; zero makes that segment straight at this end.",
+     "min": null,
+     "max": null
+    },
+    "OutY": {
+     "category": "Out handle",
+     "label": "Out Y",
+     "hint": "Y of the out-handle relative to the node, in canvas pixels before rotation.",
+     "min": null,
+     "max": null
+    },
+    "Smooth": {
+     "category": "Node",
+     "label": "Smooth",
+     "hint": "Keep the two handles opposite each other through the node, so the path runs smoothly through it. Switching it on lines them up at once; afterwards moving or typing one handle turns the other with it, keeping its length. Off, the node may be a corner.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "FiberPart": {
+   "base": "CoatedPart",
+   "props": {
+    "CoreIndex": {
+     "category": "Core",
+     "label": "Core index",
+     "hint": "Refractive index of the core, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "CoreDiameter": {
+     "category": "Core",
+     "label": "Core diameter",
+     "hint": "Diameter of the core in pixels.",
+     "min": 2.0,
+     "max": null
+    },
+    "CladdingIndex": {
+     "category": "Cladding",
+     "label": "Cladding index",
+     "hint": "Refractive index of the cladding, 1.00 to 2.55 in steps of 0.01. Below the core's index, the fibre guides.",
+     "min": null,
+     "max": null
+    },
+    "CladdingThickness": {
+     "category": "Cladding",
+     "label": "Cladding thickness",
+     "hint": "Thickness of the cladding around the core in pixels; 0 for a bare core.",
+     "min": 0.0,
+     "max": null
+    },
+    "Absorption": {
+     "category": "Cladding",
+     "label": "Cladding absorption",
+     "hint": "Peak absorption of the cladding's absorbing band, 0 (not at all) to 255, as the scene image's blue channel: a hump in the outer part of the cladding, rising over the band width from nothing, peaking, and falling to nothing at the outer edge, so the guided wave's tail stays untouched and stray light is absorbed from either side. Nothing on a bare core.",
+     "min": 0.0,
+     "max": null
+    },
+    "AbsorptionRamp": {
+     "category": "Cladding",
+     "label": "Absorption band",
+     "hint": "Half the absorbing band's width in pixels: the absorption rises over this many pixels to its peak and falls over as many to the outer edge. A band wider than the cladding is squeezed into it.",
+     "min": 1.0,
+     "max": null
+    },
+    "Ends": {
+     "category": "Shape",
+     "label": "Ends",
+     "hint": "How the two ends are cut: flat, straight across the path like a cleaved fibre, or rounded with the outer radius. The AR coating follows a flat end face.",
+     "min": null,
+     "max": null
+    },
+    "Nodes": {
+     "category": "Shape",
+     "label": "Nodes",
+     "hint": "The path's nodes relative to the centre, before rotation, each with the handles of the cubic segments meeting there. Fewer than two nodes paint nothing.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "FresnelLensPart": {
+   "base": "LensPart",
+   "props": {
+    "Division": {
+     "category": "Shape",
+     "label": "Zone division",
+     "hint": "How the zones are divided from the axis to the rim: equal in width, the outer zone the deepest; or equal in depth, each zone cut to the same depth and the zones narrowing outward, as the elements of a lighthouse lens are.",
+     "min": null,
+     "max": null
+    },
+    "Zones": {
+     "category": "Shape",
+     "label": "Zones",
+     "hint": "Number of zones each curved surface is cut into, from the axis to the rim, equal in width or in depth as the zone division says. At each zone's inner edge the arc starts again at the vertex plane, so the plate stays thin; 1 is a plain lens.",
+     "min": 1.0,
+     "max": null
+    }
+   }
+  },
+  "GrinLensPart": {
+   "base": "CoatedPart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Extent along the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    },
+    "Diameter": {
+     "category": "Shape",
+     "label": "Diameter",
+     "hint": "Extent across the axis in pixels.",
+     "min": 2.0,
+     "max": null
+    },
+    "CentreIndex": {
+     "category": "Material",
+     "label": "Centre index",
+     "hint": "Refractive index on the axis, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "EdgeIndex": {
+     "category": "Material",
+     "label": "Edge index",
+     "hint": "Refractive index at the edge, 1.00 to 2.55 in steps of 0.01. The profile between the axis and the edge is parabolic.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "FilterLayer": {
+   "base": "ObservableObject",
+   "props": {
+    "Thickness": {
+     "category": "Layer",
+     "label": "Thickness",
+     "hint": "The layer's thickness in pixels, to two decimals: a quarter wave is the wavelength divided by four times the index. A layer under half a pixel hardly shows on the grid; 0 leaves it out.",
+     "min": 0.0,
+     "max": null
+    },
+    "RefractiveIndex": {
+     "category": "Layer",
+     "label": "Index",
+     "hint": "The layer's refractive index, 1 to 2.55.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "InterferenceFilterPart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Extent of the plate along the axis in pixels, without the layers, which lie on its front.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Extent across the axis in pixels, of the plate and the layers alike.",
+     "min": 1.0,
+     "max": null
+    },
+    "Layers": {
+     "category": "Layers",
+     "label": null,
+     "hint": "The layers on the plate's front, the outermost first. Each has its thickness in pixels and its refractive index.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "LensPart": {
+   "base": "CoatedPart",
+   "props": {
+    "Mirror": {
+     "category": "Material",
+     "label": "Mirror",
+     "hint": "Make the part a mirror instead of a lens. The refractive index, the coating and the absorption are ignored then.",
+     "min": null,
+     "max": null
+    },
+    "RefractiveIndex": {
+     "category": "Material",
+     "label": "Refractive index",
+     "hint": "Refractive index of the glass, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "Absorption": {
+     "category": "Material",
+     "label": "Absorption",
+     "hint": "How strongly the part absorbs waves, 0 (not at all) to 255, as the scene image's blue channel. It rises from nothing at the outline over the absorption ramp, so a wave enters the part instead of being reflected. A mirror ignores it.",
+     "min": 0.0,
+     "max": null
+    },
+    "AbsorptionRamp": {
+     "category": "Material",
+     "label": "Absorption ramp",
+     "hint": "Depth in pixels over which the absorption rises from nothing at the outline to its full value; the longer, the less of a wave is reflected. A part thinner than twice the ramp reaches its full absorption in its middle.",
+     "min": 1.0,
+     "max": null
+    },
+    "Diameter": {
+     "category": "Shape",
+     "label": "Diameter",
+     "hint": "Extent across the axis in pixels.",
+     "min": 2.0,
+     "max": null
+    },
+    "R1": {
+     "category": "Shape",
+     "label": "R1",
+     "hint": "Radius of the first surface in pixels: positive bulges outward, negative is concave, 0 is flat. A radius too curved for the diameter and the centre thickness is raised to the smallest that fits.",
+     "min": null,
+     "max": null
+    },
+    "R2": {
+     "category": "Shape",
+     "label": "R2",
+     "hint": "Radius of the second surface in pixels: negative bulges outward, positive is concave, 0 is flat. A radius too curved for the diameter and the centre thickness is raised to the smallest that fits.",
+     "min": null,
+     "max": null
+    },
+    "IsConcave": {
+     "category": "Shape",
+     "label": "Concave (diverging)",
+     "hint": "Whether the lens diverges, its surfaces curving inward. Ticking it turns the lens around by flipping the sign of both radii; a flat surface stays flat.",
+     "min": null,
+     "max": null
+    },
+    "Thickness": {
+     "category": "Shape",
+     "label": "Centre thickness",
+     "hint": "Distance between the two surfaces on the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    }
+   }
+  },
+  "LogicGatePart": {
+   "base": "OpticalPart",
+   "props": {
+    "DesignFrequency": {
+     "category": "Design",
+     "label": "Design frequency",
+     "hint": "The source frequency the gate is designed for, on the same scale as a source's frequency: the frequency of the sources that drive it. The wavelength, and from it the core width, the coupler and the phase section, follow from it, so the gate works at this frequency only.",
+     "min": null,
+     "max": null
+    },
+    "Coating": {
+     "category": "Material",
+     "label": "AR coating",
+     "hint": "Thickness in pixels of the anti-reflection band at the ends ticked below, with the index √n of the core and of the cladding; 0 for none. A quarter-wave band, the least reflecting, is λ / (4 √n) pixels thick; the form shows it for the core.",
+     "min": 0.0,
+     "max": null
+    },
+    "InputCoated": {
+     "category": "Material",
+     "label": "AR on input side",
+     "hint": "Put the anti-reflection band on the input end. Switch it off where the gate takes its light from a gate before it, so the wave passes through the junction.",
+     "min": null,
+     "max": null
+    },
+    "OutputCoated": {
+     "category": "Material",
+     "label": "AR on output side",
+     "hint": "Put the anti-reflection band on the output end. Switch it off where the gate hands its light to a gate after it, so the wave passes through the junction.",
+     "min": null,
+     "max": null
+    },
+    "UpperOutputActive": {
+     "category": "Outputs",
+     "label": "Upper output",
+     "hint": "Let the upper output's light leave the gate. Switched off, an absorber with a soft rise takes it in the last stretch of the arm.",
+     "min": null,
+     "max": null
+    },
+    "LowerOutputActive": {
+     "category": "Outputs",
+     "label": "Lower output",
+     "hint": "Let the lower output's light leave the gate. Switched off, an absorber with a soft rise takes it in the last stretch of the arm.",
+     "min": null,
+     "max": null
+    },
+    "CoreIndex": {
+     "category": "Material",
+     "label": "Core index",
+     "hint": "Refractive index of the waveguide cores, 1.00 to 2.55 in steps of 0.01. It must be above the cladding's; the larger the difference, the narrower the cores and the tighter the bends.",
+     "min": null,
+     "max": null
+    },
+    "CladdingIndex": {
+     "category": "Material",
+     "label": "Cladding index",
+     "hint": "Refractive index of the cladding around the cores, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "PortSpacing": {
+     "category": "Shape",
+     "label": "Port spacing",
+     "hint": "Distance between the two inputs, and between the two outputs, in pixels. A value below what the design needs to keep the arms apart is raised to it, and the box shows the spacing used.",
+     "min": 2.0,
+     "max": null
+    }
+   }
+  },
+  "MetaAxiconPart": {
+   "base": "MetaSurfacePart",
+   "props": {
+    "ConeAngle": {
+     "category": "Axicon",
+     "label": "Cone angle",
+     "hint": "The angle in degrees by which each half of a wave arriving along the axis is turned toward it. The steeper, the shorter the line of focus behind the surface and the narrower the zones, which must stay a few cells wide.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "MetaLensPart": {
+   "base": "MetaSurfacePart",
+   "props": {
+    "FocalLength": {
+     "category": "Lens",
+     "label": "Focal length",
+     "hint": "Distance in pixels from the lens to its focus, for a plane wave arriving along the axis; a diverging lens spreads the wave as if from a focus that far behind it.",
+     "min": 1.0,
+     "max": null
+    },
+    "LensType": {
+     "category": "Lens",
+     "label": "Lens type",
+     "hint": "Converging, the fill greatest at the centre and falling outward within each zone, as a convex lens's glass thins; or diverging, the fill growing outward.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "MetaPrismPart": {
+   "base": "MetaSurfacePart",
+   "props": {
+    "Deflection": {
+     "category": "Prism",
+     "label": "Deflection",
+     "hint": "The angle in degrees by which a wave arriving along the axis is turned, counter-clockwise on the screen for a positive angle; 0 turns nothing. The steeper, the narrower the zones, which must stay a few cells wide.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "MetaSurfacePart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Thickness of the carrier plate along the axis in pixels; the pattern stands on its front, outside it.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Width of the plate and its pattern across the axis in pixels.",
+     "min": 2.0,
+     "max": null
+    },
+    "DesignFrequency": {
+     "category": "Design",
+     "label": "Target frequency",
+     "hint": "The source frequency the surface is designed for, on the same scale as a source's frequency. The cells' fill follows from the wavelength it gives, so the surface does its work at this frequency: a lens focuses it at the focal length, a prism turns it by its angle, an axicon by its cone angle. Another frequency sees another surface.",
+     "min": null,
+     "max": null
+    },
+    "Pitch": {
+     "category": "Pattern",
+     "label": "Pitch",
+     "hint": "The width of a cell of the pattern across the face in pixels, one ridge per cell. Well below the wavelength, so the wave sees each cell as a mean index rather than diffracting at it.",
+     "min": 1.0,
+     "max": null
+    },
+    "Height": {
+     "category": "Pattern",
+     "label": "Height",
+     "hint": "The height of the ridges in front of the plate in pixels. A full turn of phase, which the zones need, takes a height of the wavelength over the pattern index less one; a lower pattern cannot delay enough and its fill saturates.",
+     "min": 1.0,
+     "max": null
+    },
+    "PatternIndex": {
+     "category": "Pattern",
+     "label": "Pattern index",
+     "hint": "Refractive index of the ridges, 1.00 to 2.55 in steps of 0.01, usually above the plate's. The higher, the lower the pattern can be.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "OpticalPart": {
+   "base": "ObservableObject",
+   "props": {
+    "Name": {
+     "category": "General",
+     "label": "Name",
+     "hint": "Name shown in the project tree and on the canvas.",
+     "min": null,
+     "max": null
+    },
+    "Enabled": {
+     "category": "General",
+     "label": "Enabled",
+     "hint": "Paint the part into the scene; a disabled part has no effect on a run.",
+     "min": null,
+     "max": null
+    },
+    "X": {
+     "category": "Position",
+     "label": "X",
+     "hint": "X of the part's centre in canvas pixels.",
+     "min": 0.0,
+     "max": null
+    },
+    "Y": {
+     "category": "Position",
+     "label": "Y",
+     "hint": "Y of the part's centre in canvas pixels.",
+     "min": 0.0,
+     "max": null
+    },
+    "Angle": {
+     "category": "Position",
+     "label": "Angle",
+     "hint": "Rotation about the centre in degrees, counter-clockwise on the screen. 0 points the part's axis to the right.",
+     "min": -180.0,
+     "max": null
+    }
+   }
+  },
+  "PartPoint": {
+   "base": "ObservableObject",
+   "props": {
+    "X": {
+     "category": "Point",
+     "label": "X",
+     "hint": "X relative to the part's centre in canvas pixels, before rotation.",
+     "min": null,
+     "max": null
+    },
+    "Y": {
+     "category": "Point",
+     "label": "Y",
+     "hint": "Y relative to the part's centre in canvas pixels, before rotation.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "OutlinePart": {
+   "base": "ShapePart",
+   "props": {
+    "Points": {
+     "category": "Shape",
+     "label": "Points",
+     "hint": "The outline's vertices relative to the centre, before rotation. Fewer than three points paint nothing.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "PolygonPart": {
+   "base": "ShapePart",
+   "props": {
+    "Sides": {
+     "category": "Shape",
+     "label": "Number of sides",
+     "hint": "Number of sides, 3 to 64.",
+     "min": null,
+     "max": null
+    },
+    "Side": {
+     "category": "Shape",
+     "label": "Side length",
+     "hint": "Length of each side in pixels.",
+     "min": 2.0,
+     "max": null
+    }
+   }
+  },
+  "Probe": {
+   "base": "ObservableObject",
+   "props": {
+    "Name": {
+     "category": "General",
+     "label": "Name",
+     "hint": "Name shown in the project tree and in the graph title.",
+     "min": null,
+     "max": null
+    },
+    "Active": {
+     "category": "General",
+     "label": "Active",
+     "hint": "Sample and draw this probe.",
+     "min": null,
+     "max": null
+    },
+    "Layer": {
+     "category": "Measurement",
+     "label": "Layer",
+     "hint": "Output the probe samples and is drawn on.",
+     "min": null,
+     "max": null
+    },
+    "Measurement": {
+     "category": "Measurement",
+     "label": "Measurement",
+     "hint": "Recorded quantity. The field offers its amplitude only; the intensity layer its value, or the value integrated over the run.",
+     "min": null,
+     "max": null
+    },
+    "Kind": {
+     "category": "Measurement",
+     "label": "Kind",
+     "hint": "A single point, or a line from A to B.",
+     "min": null,
+     "max": null
+    },
+    "Detector": {
+     "category": "Measurement",
+     "label": "Detector",
+     "hint": "A standard probe, or a probabilistic detector: counting, the detections of the whole line step by step over time, as a photomultiplier's pulses; or imaging, the detections at every point of the line added up over the run, as a SPAD array builds an image. A detector is a line probe of the integrated intensity.",
+     "min": null,
+     "max": null
+    },
+    "Sensitivity": {
+     "category": "Measurement",
+     "label": "Detector sensitivity",
+     "hint": "Expected detections per unit of intensity per step at a point of the line: the detector's quantum efficiency and the scale from intensity to detections in one number. The detections are Poisson-distributed about intensity × sensitivity; 0 detects nothing.",
+     "min": 0.0,
+     "max": null
+    },
+    "BinSize": {
+     "category": "Measurement",
+     "label": "Bin size",
+     "hint": "Pixels of the line per bin of an imaging detector's histogram, 1 to 20: the detections of a bin's pixels are added up, and the graph shows the bin's total across them. Wider bins fill faster and show less detail.",
+     "min": 1.0,
+     "max": null
+    },
+    "AX": {
+     "category": "Position",
+     "label": "A x",
+     "hint": "X of the probe pixel, or of the start of the line, in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "AY": {
+     "category": "Position",
+     "label": "A y",
+     "hint": "Y of the probe pixel, or of the start of the line, in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "BX": {
+     "category": "Position",
+     "label": "B x",
+     "hint": "X of the end of the line in canvas pixels; line probes only.",
+     "min": null,
+     "max": null
+    },
+    "BY": {
+     "category": "Position",
+     "label": "B y",
+     "hint": "Y of the end of the line in canvas pixels; line probes only.",
+     "min": null,
+     "max": null
+    },
+    "BoxSize": {
+     "category": "Graph",
+     "label": "Box size",
+     "hint": "Nominal size of the graph box drawn over the output; a box larger than the canvas is shrunk to fit it, aspect kept.",
+     "min": null,
+     "max": null
+    },
+    "BoxX": {
+     "category": "Graph",
+     "label": "Box x",
+     "hint": "Left edge of the graph box in canvas pixels. A box placed on the probe's point A moves with the probe; dragging it close snaps it on.",
+     "min": null,
+     "max": null
+    },
+    "BoxY": {
+     "category": "Graph",
+     "label": "Box y",
+     "hint": "Top edge of the graph box in canvas pixels. A box placed on the probe's point A moves with the probe; dragging it close snaps it on.",
+     "min": null,
+     "max": null
+    },
+    "BoxWidth": {
+     "category": "Graph",
+     "label": "Box width",
+     "hint": "Width of the graph box in canvas pixels; custom box size only. A box larger than the canvas is shrunk to fit it, aspect kept.",
+     "min": null,
+     "max": null
+    },
+    "BoxHeight": {
+     "category": "Graph",
+     "label": "Box height",
+     "hint": "Height of the graph box in canvas pixels; custom box size only. A box larger than the canvas is shrunk to fit it, aspect kept.",
+     "min": null,
+     "max": null
+    },
+    "ScaleMode": {
+     "category": "Axes",
+     "label": "Step axis",
+     "hint": "Sliding window of the last steps, or the whole run; point probes and counting detectors only.",
+     "min": null,
+     "max": null
+    },
+    "AutoScaleX": {
+     "category": "Axes",
+     "label": "Auto-scale steps",
+     "hint": "Let the step axis follow the samples recorded so far; point probes and counting detectors only.",
+     "min": null,
+     "max": null
+    },
+    "AutoScaleY": {
+     "category": "Axes",
+     "label": "Auto-scale values",
+     "hint": "Fit the value axis to the data instead of the fixed minimum and maximum.",
+     "min": null,
+     "max": null
+    },
+    "YMin": {
+     "category": "Axes",
+     "label": "Value minimum",
+     "hint": "Lower bound of the value axis when it is not auto-scaled.",
+     "min": null,
+     "max": null
+    },
+    "YMax": {
+     "category": "Axes",
+     "label": "Value maximum",
+     "hint": "Upper bound of the value axis when it is not auto-scaled.",
+     "min": null,
+     "max": null
+    },
+    "YScale": {
+     "category": "Axes",
+     "label": "Value axis",
+     "hint": "A linear or a logarithmic value axis; intensity probes only, the field is always linear.",
+     "min": null,
+     "max": null
+    },
+    "Decades": {
+     "category": "Axes",
+     "label": "Decades",
+     "hint": "Decades a logarithmic value axis spans below its top; smaller values, zero included, sit on the bottom line.",
+     "min": null,
+     "max": null
+    },
+    "Window": {
+     "category": "Axes",
+     "label": "Window",
+     "hint": "Width of the sliding step window, in steps.",
+     "min": null,
+     "max": null
+    },
+    "StartAfter": {
+     "category": "General",
+     "label": "Start after step",
+     "hint": "Step at which recording starts; 0 records from the first step.",
+     "min": 0.0,
+     "max": null
+    }
+   }
+  },
+  "Project": {
+   "base": "ObservableObject",
+   "props": {
+    "Version": {
+     "category": "General",
+     "label": "Format version",
+     "hint": "Version of the project file format.",
+     "min": null,
+     "max": null
+    },
+    "Seed": {
+     "category": "General",
+     "label": "Random seed",
+     "hint": "Seed of all random decisions (emitter jitter, random gaps). The same seed reproduces the same frames.",
+     "min": null,
+     "max": null
+    },
+    "Description": {
+     "category": "General",
+     "label": "Description",
+     "hint": "Free-text notes about the project.",
+     "min": null,
+     "max": null
+    },
+    "Scene": {
+     "category": "Scene",
+     "label": "Scene",
+     "hint": "The canvas: its size or image, damping border and image sources.",
+     "min": null,
+     "max": null
+    },
+    "Simulation": {
+     "category": "Simulation",
+     "label": "Simulation",
+     "hint": "Run length and solver parameters.",
+     "min": null,
+     "max": null
+    },
+    "Display": {
+     "category": "Display",
+     "label": "Display",
+     "hint": "How the field and intensity outputs are rendered, previewed and exported.",
+     "min": null,
+     "max": null
+    },
+    "Sources": {
+     "category": null,
+     "label": null,
+     "hint": null,
+     "min": null,
+     "max": null
+    },
+    "Parts": {
+     "category": null,
+     "label": null,
+     "hint": null,
+     "min": null,
+     "max": null
+    },
+    "Probes": {
+     "category": null,
+     "label": null,
+     "hint": null,
+     "min": null,
+     "max": null
+    },
+    "ColorSchemes": {
+     "category": null,
+     "label": null,
+     "hint": null,
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "RectanglePart": {
+   "base": "ShapePart",
+   "props": {
+    "Length": {
+     "category": "Shape",
+     "label": "Length",
+     "hint": "Extent along the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    },
+    "Width": {
+     "category": "Shape",
+     "label": "Width",
+     "hint": "Extent across the axis in pixels.",
+     "min": 1.0,
+     "max": null
+    },
+    "Linked": {
+     "category": "Shape",
+     "label": "Linked",
+     "hint": "Keep the width equal to the length: a square.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "Scene": {
+   "base": "ObservableObject",
+   "props": {
+    "Mode": {
+     "category": "Canvas",
+     "label": "Mode",
+     "hint": "Blank canvas of the given size, or a canvas built from the scene image.",
+     "min": null,
+     "max": null
+    },
+    "Image": {
+     "category": "Canvas",
+     "label": "Scene image",
+     "hint": "Image the canvas is built from: red = refractive index (red 0 = a mirror), green = sources, blue = damping. The name of the embedded image, or a path relative to the project folder.",
+     "min": null,
+     "max": null
+    },
+    "ImageData": {
+     "category": null,
+     "label": null,
+     "hint": null,
+     "min": null,
+     "max": null
+    },
+    "ImagePath": {
+     "category": "Canvas",
+     "label": "Image file",
+     "hint": "Where the embedded image came from; the embedded image is what is simulated, a missing file changes nothing. The file is watched while the project is open and re-embedded when it changes; on opening the project a changed file replaces the embedded image too.",
+     "min": null,
+     "max": null
+    },
+    "Width": {
+     "category": "Canvas",
+     "label": "Width",
+     "hint": "Width of a blank canvas in pixels.",
+     "min": null,
+     "max": null
+    },
+    "Height": {
+     "category": "Canvas",
+     "label": "Height",
+     "hint": "Height of a blank canvas in pixels.",
+     "min": null,
+     "max": null
+    },
+    "DampingEdge": {
+     "category": "Canvas",
+     "label": "Damping edge",
+     "hint": "Thickness in pixels of the absorbing frame: positive inside the canvas, where it shows as a dark margin; negative outside it, simulated but never shown. 0 turns it off.",
+     "min": null,
+     "max": null
+    },
+    "Edges": {
+     "category": "Canvas",
+     "label": "Edges",
+     "hint": "Open lets a wave leave the grid, as if the canvas sat in open space; Reflective is a hard wall, as in Wave Dude 2D.",
+     "min": null,
+     "max": null
+    },
+    "RefractiveIndex": {
+     "category": "Canvas",
+     "label": "Refractive index",
+     "hint": "Refractive index of a blank canvas, 1.0 to 2.55. The wave speed is 1/n cells per step.",
+     "min": null,
+     "max": null
+    },
+    "ImageSources": {
+     "category": "Sources",
+     "label": "Image sources",
+     "hint": "Let the green channel of the scene image emit waves; the pixel value is the frequency level.",
+     "min": null,
+     "max": null
+    },
+    "ImageSourceScale": {
+     "category": "Sources",
+     "label": "Image source amplitude",
+     "hint": "Peak amplitude of the image sources.",
+     "min": 0.0,
+     "max": null
+    },
+    "ObjectSources": {
+     "category": "Sources",
+     "label": "Object sources",
+     "hint": "Use the sources defined in the project.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "ShapePart": {
+   "base": "CoatedPart",
+   "props": {
+    "Mirror": {
+     "category": "Material",
+     "label": "Mirror",
+     "hint": "Make the part a mirror instead of glass. The refractive index, the coating and the absorption are ignored then.",
+     "min": null,
+     "max": null
+    },
+    "RefractiveIndex": {
+     "category": "Material",
+     "label": "Refractive index",
+     "hint": "Refractive index of the glass, 1.00 to 2.55 in steps of 0.01.",
+     "min": null,
+     "max": null
+    },
+    "Absorption": {
+     "category": "Material",
+     "label": "Absorption",
+     "hint": "How strongly the part absorbs waves, 0 (not at all) to 255, as the scene image's blue channel. It rises from nothing at the outline over the absorption ramp, so a wave enters the part instead of being reflected. A mirror ignores it.",
+     "min": 0.0,
+     "max": null
+    },
+    "AbsorptionRamp": {
+     "category": "Material",
+     "label": "Absorption ramp",
+     "hint": "Depth in pixels over which the absorption rises from nothing at the outline to its full value; the longer, the less of a wave is reflected. A part thinner than twice the ramp reaches its full absorption in its middle.",
+     "min": 1.0,
+     "max": null
+    }
+   }
+  },
+  "SimpleGratingPart": {
+   "base": "ShapePart",
+   "props": {
+    "Columns": {
+     "category": "Lattice",
+     "label": "Columns",
+     "hint": "Number of dots along the axis. Odd counts keep the middle dot on the part's position; one column is a line grating across the axis.",
+     "min": 1.0,
+     "max": null
+    },
+    "Rows": {
+     "category": "Lattice",
+     "label": "Rows",
+     "hint": "Number of dots across the axis. Odd counts keep the middle dot on the part's position.",
+     "min": 1.0,
+     "max": null
+    },
+    "ColumnSpacing": {
+     "category": "Lattice",
+     "label": "Column spacing",
+     "hint": "Distance between neighbouring columns along the axis in pixels: the grating's period in that direction. The dots can be at most half the smaller spacing across.",
+     "min": null,
+     "max": null
+    },
+    "RowSpacing": {
+     "category": "Lattice",
+     "label": "Row spacing",
+     "hint": "Distance between neighbouring rows across the axis in pixels: the grating's period in that direction. The dots can be at most half the smaller spacing across.",
+     "min": null,
+     "max": null
+    },
+    "Diameter": {
+     "category": "Lattice",
+     "label": "Dot diameter",
+     "hint": "Diameter of each dot in pixels, at most half the smaller spacing. A dot of 2 pixels on a whole-pixel position covers a square of 2 × 2 pixels; a mirror dot under 2 pixels covers no pixel centre and paints nothing.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "Simulation": {
+   "base": "ObservableObject",
+   "props": {
+    "Steps": {
+     "category": "Run",
+     "label": "Steps",
+     "hint": "Total number of simulation steps.",
+     "min": 1.0,
+     "max": null
+    },
+    "VisualizeEvery": {
+     "category": "Run",
+     "label": "Visualize every",
+     "hint": "Render a frame, export it and sample the probes every this many steps.",
+     "min": 1.0,
+     "max": null
+    },
+    "FourthOrderLaplacian": {
+     "category": "Solver",
+     "label": "4th-order Laplacian",
+     "hint": "Use the 4th-order stencil with sub-stepping instead of the 9-point stencil. More accurate, slower.",
+     "min": null,
+     "max": null
+    },
+    "WaveSpeed": {
+     "category": "Solver",
+     "label": "Wave speed",
+     "hint": "Nominal wave speed in pixels per step; only used to estimate wavelengths in the editor.",
+     "min": 1e-06,
+     "max": 1000000.0
+    },
+    "TimeDecay": {
+     "category": "Solver",
+     "label": "Intensity time decay",
+     "hint": "Averaging window factor of the intensity: the engine averages over this × 100 / lowest source level steps.",
+     "min": 1.0,
+     "max": 100.0
+    },
+    "SourceFrequencyScale": {
+     "category": "Solver",
+     "label": "Source frequency scale",
+     "hint": "Multiplier of the level-to-frequency mapping: ω = level / 255 × 0.5 × scale, in radians per step.",
+     "min": 0.0,
+     "max": 1000.0
+    },
+    "IntensityScale": {
+     "category": "Solver",
+     "label": "Intensity scale",
+     "hint": "Multiplier applied to the intensity values the engine produces.",
+     "min": 1e-07,
+     "max": 1000000.0
+    }
+   }
+  },
+  "Source": {
+   "base": "ObservableObject",
+   "props": {
+    "Name": {
+     "category": "General",
+     "label": "Name",
+     "hint": "Name shown in the project tree and on the canvas.",
+     "min": null,
+     "max": null
+    },
+    "Enabled": {
+     "category": "General",
+     "label": "Enabled",
+     "hint": "Include the source in simulation runs.",
+     "min": null,
+     "max": null
+    },
+    "X": {
+     "category": "Position",
+     "label": "X",
+     "hint": "X of the emitter, or of the array centre, in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "Y": {
+     "category": "Position",
+     "label": "Y",
+     "hint": "Y of the emitter, or of the array centre, in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "Frequency": {
+     "category": "Wave",
+     "label": "Frequency",
+     "hint": "Frequency as a level up to 255, decimals allowed, the same scale as the green channel of image sources. Above 255 the grid cannot sample the wave.",
+     "min": null,
+     "max": null
+    },
+    "Amplitude": {
+     "category": "Wave",
+     "label": "Amplitude",
+     "hint": "Amplitude in percent, 0 to 100, decimals allowed.",
+     "min": 0.0,
+     "max": 100.0
+    },
+    "Phase": {
+     "category": "Wave",
+     "label": "Phase",
+     "hint": "Phase offset in degrees, -180 to 180.",
+     "min": -180.0,
+     "max": 180.0
+    },
+    "Mode": {
+     "category": "Pulsing",
+     "label": "Mode",
+     "hint": "Emit continuously or in bursts.",
+     "min": null,
+     "max": null
+    },
+    "PulseShape": {
+     "category": "Pulsing",
+     "label": "Pulse shape",
+     "hint": "Envelope of each burst; pulsed mode only.",
+     "min": null,
+     "max": null
+    },
+    "PulseWidth": {
+     "category": "Pulsing",
+     "label": "Pulse width",
+     "hint": "Length of each burst in cycles of the source frequency; pulsed mode only.",
+     "min": 1.0,
+     "max": null
+    },
+    "OffWidth": {
+     "category": "Pulsing",
+     "label": "Off width",
+     "hint": "Length of the gap between bursts in cycles; pulsed mode only.",
+     "min": 1.0,
+     "max": null
+    },
+    "DetachAfter": {
+     "category": "General",
+     "label": "Detach after step",
+     "hint": "Simulation step at which the source fades out; -1 keeps it on for the whole run.",
+     "min": null,
+     "max": null
+    },
+    "Array": {
+     "category": "Array",
+     "label": "Array",
+     "hint": "Grid of emitters around the position; empty for a single emitter.",
+     "min": null,
+     "max": null
+    },
+    "IsComposite": {
+     "category": "Array",
+     "label": "Composite source",
+     "hint": "Emit from an array of emitters instead of a single point.",
+     "min": null,
+     "max": null
+    }
+   }
+  },
+  "SourceArray": {
+   "base": "ObservableObject",
+   "props": {
+    "SizeX": {
+     "category": "Grid",
+     "label": "Columns",
+     "hint": "Number of emitters across. Odd counts keep the centre emitter on the source position.",
+     "min": 1.0,
+     "max": null
+    },
+    "SizeY": {
+     "category": "Grid",
+     "label": "Rows",
+     "hint": "Number of emitters down.",
+     "min": 1.0,
+     "max": null
+    },
+    "SpacingX": {
+     "category": "Grid",
+     "label": "Horizontal spacing",
+     "hint": "Distance between neighbouring columns in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "SpacingY": {
+     "category": "Grid",
+     "label": "Vertical spacing",
+     "hint": "Distance between neighbouring rows in canvas pixels.",
+     "min": null,
+     "max": null
+    },
+    "Angle": {
+     "category": "Grid",
+     "label": "Rotation",
+     "hint": "Rotation of the grid about the source position in degrees, counter-clockwise on the screen. 0 keeps the rows horizontal.",
+     "min": -180.0,
+     "max": null
+    },
+    "RandomFrequency": {
+     "category": "Randomisation",
+     "label": "Frequency",
+     "hint": "Each emitter's level is offset by up to ± this amount. 0 turns it off.",
+     "min": 0.0,
+     "max": null
+    },
+    "RandomPhase": {
+     "category": "Randomisation",
+     "label": "Phase",
+     "hint": "Each emitter's phase is offset by up to ± this many degrees. 0 turns it off.",
+     "min": 0.0,
+     "max": null
+    },
+    "RandomOffWidth": {
+     "category": "Randomisation",
+     "label": "Off width",
+     "hint": "Each gap between bursts is offset by up to ± this many cycles, re-drawn every period. 0 turns it off.",
+     "min": 0.0,
+     "max": null
+    },
+    "RandomPosition": {
+     "category": "Randomisation",
+     "label": "Position",
+     "hint": "Each emitter is moved by up to ± this many pixels in X and in Y. 0 turns it off.",
+     "min": 0.0,
+     "max": null
+    }
+   }
+  },
+  "TrianglePart": {
+   "base": "ShapePart",
+   "props": {
+    "Base": {
+     "category": "Shape",
+     "label": "Base",
+     "hint": "Length of the base in pixels; the base lies across the axis, toward a source on the left.",
+     "min": 2.0,
+     "max": null
+    },
+    "Type": {
+     "category": "Shape",
+     "label": "Type",
+     "hint": "Equilateral, right isosceles (the 45° prism), 30-60-90, isosceles with one typed angle, or custom with both typed.",
+     "min": null,
+     "max": null
+    },
+    "AngleA": {
+     "category": "Shape",
+     "label": "Angle A",
+     "hint": "Base angle at the first end of the base, in degrees. Typed for the isosceles and custom types; the presets fix it.",
+     "min": 1.0,
+     "max": null
+    },
+    "AngleB": {
+     "category": "Shape",
+     "label": "Angle B",
+     "hint": "Base angle at the second end of the base, in degrees. Typed for the custom type; the others fix it.",
+     "min": 1.0,
+     "max": null
+    }
+   }
+  },
+  "ZonePlatePart": {
+   "base": "OpticalPart",
+   "props": {
+    "Mount": {
+     "category": "Shape",
+     "label": "Mount",
+     "hint": "Surround the plate with an absorbing mount, so no light passes outside its diameter. Without it, that light meets the focused light on the axis and moves the focus further out, the more so the fewer zones the plate has.",
+     "min": null,
+     "max": null
+    },
+    "MountWidth": {
+     "category": "Shape",
+     "label": "Mount width",
+     "hint": "Width in pixels of the absorbing mount on either side, beyond the diameter.",
+     "min": 1.0,
+     "max": null
+    },
+    "Diameter": {
+     "category": "Shape",
+     "label": "Diameter",
+     "hint": "Extent across the axis in pixels; the zones fill it.",
+     "min": 2.0,
+     "max": null
+    },
+    "Thickness": {
+     "category": "Shape",
+     "label": "Thickness",
+     "hint": "Extent along the axis in pixels: the depth of the blocks. It should leave room for the anti-reflection rise on both faces.",
+     "min": 1.0,
+     "max": null
+    },
+    "Coating": {
+     "category": "Shape",
+     "label": "Anti-reflection",
+     "hint": "Depth in pixels over which a block's absorption rises from nothing at its faces to its full strength, so the blocks reflect little; at most half the thickness takes effect.",
+     "min": 0.0,
+     "max": null
+    },
+    "DesignFrequency": {
+     "category": "Design",
+     "label": "Target frequency",
+     "hint": "The source frequency the plate is designed for, on the same scale as a source's frequency. The zones follow from the wavelength it gives, so the plate focuses this frequency at the focal length; other frequencies focus elsewhere.",
+     "min": null,
+     "max": null
+    },
+    "FocalLength": {
+     "category": "Design",
+     "label": "Focal length",
+     "hint": "Distance in pixels from the plate to its focus, for a plane wave arriving along the axis.",
+     "min": 1.0,
+     "max": null
+    },
+    "Inverse": {
+     "category": "Design",
+     "label": "Inverse",
+     "hint": "Exchange the zones: the central zone becomes a block, the first ring open, and so on. The focus stays where it is.",
+     "min": null,
+     "max": null
+    }
+   }
+  }
+ },
+ "kinds": {
+  "LensPart": "A lens or a mirror: a strip of the diameter between two spherical surfaces, each bulging outward, flat or hollow by the sign of its radius, the centre thickness apart. As a mirror it reflects everything; as a lens it refracts by its index, with an anti-reflection coating and absorption if wanted.",
+  "FresnelLensPart": "A Fresnel lens: a lens whose curved surfaces are cut into zones from the axis to the rim, equal in width or in depth, each zone's arc starting again at the vertex plane, so a thin plate bends light as a thick lens would. The settings are the lens's, with the number of zones and their division; a flat surface stays flat.",
+  "FiberPart": "A fibre: a core of higher index inside a cladding, along a smooth path of Bézier segments through its nodes, with flat or round ends. A wave coupled into the core is guided along the path; the cladding can absorb stray light at its rim.",
+  "BraggReflectorPart": "A Bragg reflector: pairs of layers of two indices stacked along the axis. It reflects strongly around the wavelength the layer thicknesses are tuned to, a quarter wave each, and passes others.",
+  "GrinLensPart": "A gradient-index lens: a rectangle whose index falls from the axis to the edge in a parabolic profile, so it focuses like a lens with flat faces.",
+  "ZonePlatePart": "A zone plate: Fresnel zones cut for a design frequency and a focal length, every second zone an absorbing block, the central zone open or, inverted, a block. It focuses by diffraction; an optional mount stops light passing outside the diameter.",
+  "DiffuserPart": "A diffuser: a plate of glass or mirror whose front face is rough, the back flat. The roughness is a spread of ripples about a centre wavelength, their phases random from the project's seed; it scatters what passes or reflects.",
+  "InterferenceFilterPart": "An interference filter: a plate of glass or mirror with a stack of thin layers on its front, each with its own thickness and index. Waves reflected at the layers' boundaries interfere, so the stack reflects some wavelengths and passes others; a new filter is a quarter-wave stack for a wavelength of 16 pixels.",
+  "SimpleGratingPart": "A simple 2D grating: a lattice of round dots, so many columns along the axis by so many rows across, each direction with its own spacing, nothing between them. The dots are mirror, or glass with an index; a wave passing the lattice is diffracted into the orders the spacings set. One column makes a line grating.",
+  "FacettedGratingPart": "A facetted grating: a plate of glass or mirror whose front face carries a periodic relief, a sawtooth, a square wave or a sinusoid repeated every pitch, the back flat. A diffuser of one wavelength: the pitch and the wavelength set the angles the orders leave at.",
+  "MetaLensPart": "A meta lens: a carrier plate with a sub-wavelength pattern on its front, a ridge of its own index in every cell, whose fill is computed from the target frequency and the focal length so the cells delay the wave as a lens would, zone by zone. Converging or diverging; the pattern's tops and the plate's back can carry an anti-reflection coating.",
+  "MetaPrismPart": "A meta prism: a carrier plate with a sub-wavelength pattern on its front whose cells delay the wave in a line across the face, so a wave arriving along the axis leaves turned by a set angle, as a blazed grating's first order. Cut for a target frequency; the pattern's tops and the plate's back can carry an anti-reflection coating.",
+  "MetaAxiconPart": "A meta axicon: a carrier plate with a sub-wavelength pattern on its front whose cells delay the wave in proportion to the distance from the axis, so the two halves of a wave arriving along the axis are turned toward it by a set angle and cross along a line behind the surface rather than at a point. Cut for a target frequency; the pattern's tops and the plate's back can carry an anti-reflection coating.",
+  "PolygonPart": "A regular polygon of glass or mirror, by its number of sides and the side length.",
+  "RectanglePart": "A rectangle of glass or mirror, by length and width; linked, a square. A flat mirror is a long, narrow one.",
+  "EllipsePart": "An ellipse of glass or mirror, by the length and width of its box; linked, a circle.",
+  "TrianglePart": "A triangle of glass or mirror: the base across the axis, the apex along it, the base angles set by a preset or by hand.",
+  "OutlinePart": "A free outline of glass or mirror: a closed shape through the points you place and drag; fewer than three paint nothing.",
+  "XorGatePart": "An optical XOR gate: two input waveguides, a phase section putting the lower input a quarter period ahead, and a coupler whose upper output carries their difference. It lights when one input is lit, not both, for coherent inputs at the design frequency.",
+  "AndGatePart": "An optical AND gate: the same coupler with the lower input a quarter period behind, so the upper output carries the sum. It is brightest with both inputs lit, about four times a single one; a passive linear gate has no truer AND.",
+  "OrGatePart": "An optical OR gate: the same coupler with the lower input a twelfth of a period ahead, so the upper output carries half the power of either input and of both. It lights with one input or both."
+ },
+ "enums": {
+  "ProbeLayer.Field": "Field",
+  "ProbeLayer.Intensity": "Intensity",
+  "ProbeMeasurement.Amplitude": "Amplitude",
+  "ProbeMeasurement.Value": "Value",
+  "ProbeMeasurement.IntegratedValue": "Integrated value",
+  "ProbeKind.Point": "Point",
+  "ProbeKind.Line": "Line",
+  "ProbeDetector.Standard": "Standard",
+  "ProbeDetector.Counting": "Counting",
+  "ProbeDetector.Imaging": "Imaging",
+  "ProbeBoxSize.Tiny": "Tiny",
+  "ProbeBoxSize.Small": "Small",
+  "ProbeBoxSize.Medium": "Medium",
+  "ProbeBoxSize.Large": "Large",
+  "ProbeBoxSize.ExtraLarge": "Extra large",
+  "ProbeBoxSize.Custom": "Custom",
+  "ProbeScaleMode.Running": "Running",
+  "ProbeScaleMode.Full": "Full",
+  "ProbeValueScale.Linear": "Linear",
+  "ProbeValueScale.Logarithmic": "Logarithmic",
+  "SceneMode.Canvas": "Canvas",
+  "SceneMode.Image": "Image",
+  "EdgeMode.Open": "Open",
+  "EdgeMode.Reflective": "Reflective",
+  "SourceMode.Continuous": "Continuous",
+  "SourceMode.Pulsed": "Pulsed",
+  "PulseShape.Gaussian": "Gaussian",
+  "PulseShape.SmoothedSquare": "Smoothed square",
+  "ColorSchemeKind.Unspecified": "Unspecified",
+  "ColorSchemeKind.Field": "Field",
+  "ColorSchemeKind.Intensity": "Intensity",
+  "AppTheme.System": "System",
+  "AppTheme.Light": "Light",
+  "AppTheme.Dark": "Dark",
+  "GateOutput.Xor": "XOR: dark with both on",
+  "GateOutput.And": "AND: 4 × as bright with both on",
+  "GateOutput.Or": "OR: as bright for one as for two",
+  "GateOutput.Remainder": "Remainder: 3 × with both on",
+  "FiberEnds.Flat": "Flat",
+  "FiberEnds.Round": "Round",
+  "CoatingProfile.Layer": "Layer",
+  "CoatingProfile.Graded": "Graded",
+  "ZoneDivision.EqualWidth": "Equal width",
+  "ZoneDivision.EqualDepth": "Equal depth",
+  "FacetPattern.Sawtooth": "Sawtooth",
+  "FacetPattern.SquareWave": "Square wave",
+  "FacetPattern.Sinusoidal": "Sinusoidal",
+  "MetaLensType.Converging": "Converging",
+  "MetaLensType.Diverging": "Diverging",
+  "TriangleType.Equilateral": "Equilateral",
+  "TriangleType.RightIsosceles": "Right isosceles (45°)",
+  "TriangleType.ThirtySixtyNinety": "30-60-90",
+  "TriangleType.Isosceles": "Isosceles",
+  "TriangleType.Custom": "Custom"
+ }
+}

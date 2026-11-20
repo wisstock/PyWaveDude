@@ -1,0 +1,459 @@
+# PyWaveDude defaults: what a new project, a new object and the app start with.
+# Read once at start (another file: --defaults FILE). Every key must name an existing setting.
+# A saved project keeps its own values; an attribute a .wdproj file leaves out still means the
+# project format's default, not this file's.
+
+app:
+  backend: auto                      # compute backend at start: auto | cpu | mlx
+  ui:
+    window_width: 1600
+    window_height: 980
+    left_pane_width: 400               # project tree and properties
+    tree_pane_height: 330
+    probe_graph_column: 440            # width of the probe graph column
+    font_size: 15                      # points, Inter
+    zoom: 1.0                          # UI zoom at start
+    zoom_choices: [0.8, 1.0, 1.25, 1.5, 2.0]
+    tree_max_rows: 2000                # rows shown per tree group
+    show_probe_graphs: true            # open the probe graph column when a run with probes starts
+  canvas:
+    pick_radius: 8                     # screen px: how close a click must be to a marker
+    snap_radius: 8                     # screen px: how close a centre must come to a grid line
+    lever_length: 28                   # screen px beyond the outline: the rotation lever
+  playback:
+    speed: 1.0                         # × the export frame rate
+    speed_choices: [0.25, 0.5, 1, 2, 4, 8]
+    loop: false
+    live: false                        # follow the newest frame while a run computes
+  run:
+    warn_memory: true                  # ask before a run whose frames exceed the budget
+    memory_share: 0.5                  # budget: this share of the physical memory
+  export:
+    file: pywavedude_export            # file name (in the working directory) the dialog starts with
+    format: MP4                        # MP4 | MPEG1 | AVI | MOV | MOV_PNG | PNG | JPEG | EXR | EXR_ROOT
+    layers: Both                       # Field | Intensity | Both
+    outlines: true                     # part outlines in the export
+
+new_project:
+  scene:
+    width: 1920                         # Width
+    height: 1080                        # Height
+    refractive_index: 1.0               # Refractive index
+    open_edges: true                    # Edges
+    damping_edge: -32                   # Damping edge
+    image_sources: false                # Image sources
+    image_source_scale: 1.0             # Image source amplitude
+    object_sources: true                # Object sources
+  simulation:
+    steps: 2500                         # Steps
+    visualize_every: 2                  # Visualize every
+    fourth_order: true                  # 4th-order Laplacian
+    wave_speed: 1.0                     # Wave speed
+    source_frequency_scale: 2.0         # Source frequency scale
+    time_decay: 10.0                    # Intensity time decay
+    intensity_scale: 1.0                # Intensity scale
+    preview: Half                       # Preview resolution
+    rerun_on_edit: true                 # Re-run after edits
+    split_wavelengths: false            # Separate wavelengths
+    preview_frames: 1                   # Preview frames
+  display:
+    layer: Both                         # Pictures
+    arrangement: Stacked                # Arrangement
+    handles: true                       # Handles in the preview
+    labels: true                        # Labels in the preview
+    field_scheme: Default field         # Field colour scheme
+    intensity_scheme: Default intensity  # Intensity colour scheme
+    field_brightness: 30.0              # Field brightness
+    intensity_brightness: 30.0          # Intensity brightness
+    field_black: -0.05                  # Field black level
+    intensity_black: 0.0                # Intensity black level
+    markers: true                       # Markers
+    outline: true                       # Outline in the preview
+    outline_gain: 3.0                   # Outline brightness
+    auto_brightness: false              # Keep auto brightness
+    fps: 60                             # Frame rate
+    quality: 85                         # Quality
+    graphs_in_preview: false             # Graphs on the canvas
+    probe_colours: true                 # Probe curves per colour
+    grid: false                         # Grid
+    grid_step: 50                       # Grid step
+    grid_opacity: 0.25                  # Grid opacity
+    grid_snap: true                     # Snap to grid
+    true_colour: true                   # True colour intensity
+    nm_per_px: 0.0                      # nm per px of wavelength
+    export_from: 0                      # From step
+    export_to: 0                        # To step
+    probe_graphs_in_export: true        # Probe graphs in the export
+    probe_markers_in_export: true       # Probe markers in the export
+    source_markers_in_export: false     # Source markers in the export
+  sources:                           # the sources a new project starts with
+    - name: Source 1
+      x: 480
+      y: 540
+
+new_objects:
+  source:
+    enabled: true                       # Enabled
+    level: 100.0                        # Frequency
+    amplitude: 100.0                    # Amplitude
+    phase: 0.0                          # Phase
+    mode: Continuous                    # Mode
+    pulse_shape: Gaussian               # Pulse shape
+    pulse_width: 10                     # Pulse width
+    off_width: 10                       # Off width
+    detach_after: -1                    # Detach after step
+    composite: false                    # Composite source
+    size_x: 1                           # Columns
+    size_y: 1                           # Rows
+    spacing_x: 10                       # Horizontal spacing
+    spacing_y: 10                       # Vertical spacing
+    array_angle: 0.0                    # Rotation
+    random_frequency: 0                 # Random spread: frequency
+    random_phase: 0                     # Random spread: phase
+    random_off_width: 0                 # Random spread: off width
+    random_position: 0                  # Random spread: position
+  probe:
+    active: true                        # Active
+    start_after: 0                      # Start after step
+    sensitivity: 20.0                   # Detector sensitivity
+    bin_size: 4                         # Bin size
+    box_size: Medium                    # Box size
+    box_width: 400                      # Box width
+    box_height: 200                     # Box height
+    scale_mode: Running                 # Step axis
+    window: 500                         # Window
+    auto_scale_x: true                  # Auto-scale steps
+    auto_scale_y: true                  # Auto-scale values
+    y_min: -1.0                         # Value minimum
+    y_max: 1.0                          # Value maximum
+    y_scale: Linear                     # Value axis
+    decades: 6                          # Decades
+  parts:
+    LensPart:                    # Lens
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      diameter: 200                       # Diameter
+      r1: 300.0                           # R1
+      r2: -300.0                          # R2
+      thickness: 40                       # Centre thickness
+    FresnelLensPart:                    # Fresnel lens
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      diameter: 500                       # Diameter
+      r1: 1500.0                          # R1
+      r2: -1500.0                         # R2
+      thickness: 20                       # Centre thickness
+      zones: 4                            # Zones
+      division: EqualWidth                # Zone division
+    PolygonPart:                    # Polygon
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      sides: 6                            # Number of sides
+      side: 60                            # Side length
+    RectanglePart:                    # Rectangle
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 60                          # Length
+      width: 60                           # Width
+    EllipsePart:                    # Ellipse
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 60                          # Length
+      width: 60                           # Width
+    TrianglePart:                    # Triangle
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      base: 60                            # Base
+      type: Equilateral                   # Type
+      angle_a: 60.0                       # Angle A
+      angle_b: 60.0                       # Angle B
+    OutlinePart:                    # Outline
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+    FiberPart:                    # Fiber
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      core_index: 1.5                     # Core index
+      core_diameter: 20                   # Core diameter
+      cladding_index: 1.45                # Cladding index
+      cladding_thickness: 10              # Cladding thickness
+      absorption: 0                       # Cladding absorption
+      absorption_ramp: 10                 # Absorption band
+      ends: Flat                          # Ends
+    BraggReflectorPart:                    # Bragg reflector
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      pairs: 10                           # Layer pairs
+      thickness1: 10                      # Thickness 1
+      thickness2: 10                      # Thickness 2
+      index1: 1.5                         # Index 1
+      index2: 2.0                         # Index 2
+      width: 200                          # Width
+    GrinLensPart:                    # GRIN lens
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      length: 100                         # Length
+      diameter: 100                       # Diameter
+      centre_index: 1.8                   # Centre index
+      edge_index: 1.5                     # Edge index
+    ZonePlatePart:                    # Zone plate
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      diameter: 800                       # Diameter
+      thickness: 32                       # Thickness
+      coating: 0                          # Anti-reflection
+      design_frequency: 50.0              # Target frequency
+      focal_length: 600                   # Focal length
+      inverse: false                      # Inverse
+      mount: false                        # Mount
+      mount_width: 200                    # Mount width
+    PhaseStepPlatePart:                    # Phase step plate
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      aperture: 400                       # Aperture
+      base_thickness: 8                   # Base thickness
+      zones: 2                            # Zones
+      phase_step: 180.0                   # Phase step
+      design_frequency: 50.0              # Design frequency
+      medium_index: 1.0                   # Medium index
+    DiffuserPart:                    # Diffuser
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: false                 # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: false                 # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+      center_wavelength: 16.0             # Centre wavelength
+      amplitude: 1.0                      # Amplitude
+      sigma: 6.0                          # Sigma
+    InterferenceFilterPart:                    # Interference filter
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+    SimpleGratingPart:                    # Grating
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: true                        # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      columns: 1                          # Columns
+      rows: 31                            # Rows
+      column_spacing: 16                  # Column spacing
+      row_spacing: 16                     # Row spacing
+      diameter: 2                         # Dot diameter
+    FacettedGratingPart:                    # Facetted grating
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: true                  # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+      pattern: Sawtooth                   # Pattern
+      pitch: 32.0                         # Pitch
+      amplitude: 4.0                      # Amplitude
+    MetaLensPart:                    # Meta lens
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: false                 # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+      design_frequency: 50.0              # Target frequency
+      pitch: 4.0                          # Pitch
+      height: 32.0                        # Height
+      pattern_index: 2.0                  # Pattern index
+      focal_length: 500                   # Focal length
+      lens_type: Converging               # Lens type
+    MetaPrismPart:                    # Meta prism
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: false                 # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+      design_frequency: 50.0              # Target frequency
+      pitch: 4.0                          # Pitch
+      height: 32.0                        # Height
+      pattern_index: 2.0                  # Pattern index
+      deflection: 20.0                    # Deflection
+    MetaAxiconPart:                    # Meta axicon
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: true                  # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: false                 # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 50                          # Length
+      width: 500                          # Width
+      design_frequency: 50.0              # Target frequency
+      pitch: 4.0                          # Pitch
+      height: 32.0                        # Height
+      pattern_index: 2.0                  # Pattern index
+      cone_angle: 10.0                    # Cone angle
+    XorGatePart:                    # XOR gate
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      design_frequency: 50.0              # Design frequency
+      core_index: 2.55                    # Core index
+      cladding_index: 1.45                # Cladding index
+      port_spacing: 2                     # Port spacing
+      coating: 6                          # AR coating
+      input_coated: true                  # AR on input side
+      output_coated: true                 # AR on output side
+      upper_output_active: true           # Upper output
+      lower_output_active: true           # Lower output
+    AndGatePart:                    # AND gate
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      design_frequency: 50.0              # Design frequency
+      core_index: 2.55                    # Core index
+      cladding_index: 1.45                # Cladding index
+      port_spacing: 2                     # Port spacing
+      coating: 6                          # AR coating
+      input_coated: true                  # AR on input side
+      output_coated: true                 # AR on output side
+      upper_output_active: true           # Upper output
+      lower_output_active: true           # Lower output
+    OrGatePart:                    # OR gate
+      enabled: true                       # Enabled
+      angle: 0.0                          # Angle
+      design_frequency: 50.0              # Design frequency
+      core_index: 2.55                    # Core index
+      cladding_index: 1.45                # Cladding index
+      port_spacing: 2                     # Port spacing
+      coating: 6                          # AR coating
+      input_coated: true                  # AR on input side
+      output_coated: true                 # AR on output side
+      upper_output_active: true           # Upper output
+      lower_output_active: true           # Lower output
