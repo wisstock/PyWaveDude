@@ -3,24 +3,11 @@
 Python port of [WaveDude Next](https://github.com/wavedudenext/WaveDudeNext) (Alexander Gräf, Huygens Optics),
 including its colour schemes and project file format: a 2D wave optics simulator.
 
+![](pic/sted.png)
+
 ## Contents
 
-- [Installation](#installation)
-- [Running](#running)
-- [Workflow](#workflow)
-- [Simulation](#simulation)
-- [Scene](#scene)
-- [Sources](#sources)
-- [Optical parts](#optical-parts)
-- [Probes](#probes)
-- [Display](#display)
-- [Interface](#interface)
-- [Controls](#controls)
-- [Export](#export)
-- [Projects](#projects)
-- [Defaults](#defaults)
-- [Benchmark](#benchmark)
-- [License](#license)
+[TOC]
 
 ## Installation
 
