@@ -85,8 +85,8 @@ class DisplaySettings:
     quality: int = 85
     graphs_in_preview: bool = False         # the app's own (not written to project files) ...
     probe_colours: bool = True              # intensity probe graphs: a curve per wavelength (separate wavelengths)
-    grid: bool = False                      # ... grid over the preview, never exported
-    grid_step: int = 50
+    grid: bool = True                       # ... grid over the preview, never exported
+    grid_step: int = 25
     grid_opacity: float = 0.25
     grid_snap: bool = True                  # element centres stick to grid lines and nodes
     true_colour: bool = True                # split runs: each wavelength's intensity in its own colour

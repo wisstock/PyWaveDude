@@ -40,8 +40,9 @@ First steps:
    canvas to move it, its handles to rotate or resize it.
 4. **Run** (F5): computes the simulation from step 0; the timeline returns to 0 and shades as frames are computed.
 5. **▶ Play** (Space): animates the computed frames; the same button pauses. Click or drag the timeline to scrub.
-6. While you edit, the frame at the timeline's position is recomputed and shown; when the edit is finished it
-   becomes an undo step and, after a run, a new run starts (switch: *Re-run automatically after edits*).
+6. An edit stops playback; when it is finished it becomes an undo step and, after a run, a new run starts from
+   step 0 with the timeline kept in place: the picture there updates once the new run reaches it
+   (switch: *Re-run automatically after edits*).
 7. **Stop** (Shift + F5): discards the computed simulation. **File → Export** saves a video.
 
 ## Features
@@ -67,7 +68,8 @@ First steps:
 | Blank canvas | width, height, background refractive index (1.00–2.55) |
 | Scene image | PNG, BMP, JPEG, TIFF, GIF; embedded in the saved project |
 
-Grid (row under the transport buttons, Display settings or View menu): on/off, step in pixels, opacity; object centres snap to grid lines and nodes
+Grid (row under the transport buttons, Display settings or View menu): on/off (on by default), step in pixels
+(25 by default), opacity; object centres snap to grid lines and nodes
 (switchable). Shown on the preview only, never exported.
 
 Scene image channels:

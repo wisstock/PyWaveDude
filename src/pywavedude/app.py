@@ -3,10 +3,9 @@
 """Dear PyGui front end: the project tree and properties on the left, the pictures, timeline and transport in the
 middle, the probe graphs on the right, the status bar at the bottom.
 
-Live editing: an edit of the scene, a source or a part stops playback and a run in progress, the frame at the
-timeline's position is computed afresh on a worker (a scratch frame) and shown as soon as it is ready, and when the
-edit has finished (the mouse released, a field left) it becomes an undo step and, after a run, a new run starts
-from step 0."""
+Live editing: an edit of the scene, a source or a part stops playback and a run in progress; when the edit has
+finished (the mouse released, a field left) it becomes an undo step and, after a run, a new run starts from step 0
+while the timeline stays where it is: the picture there changes when the new run reaches it."""
 
 from __future__ import annotations
 
@@ -29,7 +28,6 @@ from .parts import model as pm
 from .project import Project, build_engine, paint_scene
 from .render import builtin_schemes
 from .runner import SimulationRun
-from .scratch import ScratchRunner
 from .ui_dialogs import DialogsMixin
 from .ui_export import ExportMixin
 from .ui_preview import PREVIEW, PreviewMixin
@@ -76,9 +74,6 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         self._init_export()
         self._init_dialogs()
         self.history = UndoHistory(self.p)
-        self.scratch = ScratchRunner()
-        self._scratch_key = 0
-        self._scratch_valid_from = 0
         self._sim_edit = False
         self._probe_edit = False
         self._scene_edges: np.ndarray | None = None
@@ -120,7 +115,6 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
                     self.run.stop()
             if self.playing:
                 self._set_playing(False)
-            self._request_scratch()
         elif kind == "probe":
             self._probe_edit = True
 
@@ -187,9 +181,8 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         self._dirty_view = True
         if self.run is not None:
             self.run_stale = True
-            self._request_scratch()
             if self.p.sim.rerun_on_edit:
-                self.start()
+                self._rerun()
 
     def _undo(self, *_):
         new = self.history.undo(self.p)
@@ -293,11 +286,16 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         return build_engine(self.p, painted=image)
 
     def start(self, *_) -> None:
-        """Run: compute the simulation from step 0; the timeline returns to 0."""
+        """Run (F5): compute the simulation from step 0; the timeline returns to 0."""
         if self._ask_memory(self._start_now):
             self._start_now()
 
-    def _start_now(self) -> None:
+    def _rerun(self) -> None:
+        """The automatic re-run after an edit: from step 0, the timeline kept where it is."""
+        if self._ask_memory(lambda: self._start_now(keep_position=True)):
+            self._start_now(keep_position=True)
+
+    def _start_now(self, keep_position: bool = False) -> None:
         if self.run is not None:
             self.run.stop()
         try:
@@ -312,11 +310,11 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         if self._graph_probes and config.app("ui.show_probe_graphs", True) and not self._graphs_hidden_by_user:
             self._show_graphs(True, by_user=False)
         self.run_stale = False
-        self._scratch_valid_from = self._scratch_key + 1
         self._sim_edit = self._probe_edit = False
         self._graph_key = None
-        self._set_position(0, by_user=False)
-        self._shown_key = None
+        if not keep_position:
+            self._set_position(0, by_user=False)
+            self._shown_key = None
         self._message(f"Run started: {eng.description}")
 
     def stop(self, *_) -> None:
@@ -329,25 +327,6 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         self._set_position(0, by_user=False)
         self._shown_key = None
         self._dirty_view = True
-
-    def _request_scratch(self) -> None:
-        """The frame at the timeline's position, of the project as it is now, computed on the worker."""
-        pos = self.position
-        if pos <= 0:
-            return
-        memo = {id(self.p.image_bytes): self.p.image_bytes} if self.p.image_bytes else {}
-        pc = copy.deepcopy(self.p, memo)
-        rgb = self.rgb if self.p.scene.use_image else None
-        m = self.p.sim
-
-        def make():
-            image = paint_scene(pc, rgb)
-            eng = build_engine(pc, painted=image)
-            eng.scene_edges = glowing_edges(image) if image is not None else None
-            return eng
-
-        self._scratch_key += 1
-        self.scratch.request((self._scratch_key, pos), make, pos * m.visualize_every, PREVIEW[m.preview])
 
     # ================================================================= placing new objects
     def _arm(self, what: str, value: str | None = None) -> None:
@@ -799,18 +778,16 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         self._model_changed()
 
     def _frame_to_show(self):
-        """The scratch frame for this position while the run is stale, else the run's nearest kept frame."""
-        res = self.scratch.result
-        if res is not None and (self.run is None or self.run_stale) and not res.error \
-                and res.key[0] >= self._scratch_valid_from and res.key[1] == self.position:
-            if res.edges is not None:
-                self._scene_edges = res.edges
-            return res, ("scratch", res.key)
+        """The run's frame at the position; while a run has not reached it yet, the picture shown stays."""
         if self.run is not None:
             n = self.run.frame_count()
-            if n:
-                fr = self.run.frame(min(self.position // self._div(), n - 1))
+            idx = self.position // self._div()
+            if n and (idx < n or not self.run.running or self._shown_frame is None
+                      or self._shown_key[0] == "idle"):
+                fr = self.run.frame(min(idx, n - 1))
                 return fr, ("run", id(fr))
+            if n or self._shown_frame is not None:
+                return self._shown_frame, self._shown_key
         s = self.p.scene
         ps = PREVIEW[self.p.sim.preview]
         h, w = -(-s.height // ps), -(-s.width // ps)
@@ -830,7 +807,7 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
             self._end_edit_now = False
             self.history.end_step(self.p)
             if (self._sim_edit or self._probe_edit) and self.p.sim.rerun_on_edit and self.run is not None:
-                self.start()
+                self._rerun()
             self._sim_edit = self._probe_edit = False
             self._update_title()
         self._layout_preview()
@@ -875,15 +852,12 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         run = self.run
         if run is None:
             state = "no run: Run (F5) computes the simulation"
-            if self.scratch.busy:
-                state = "computing the frame at the position..."
         else:
             st = run.stats
             if st.error:
                 state = "error: " + st.error
             elif self.run_stale:
-                state = "edited since the run" + (": computing the frame at the position..." if self.scratch.busy
-                                                   else "")
+                state = "edited since the run"
             elif run.running:
                 state = ("paused" if run.paused else "computing") + \
                         f"  step {st.steps_done}/{st.total_steps}  {st.steps_per_second:.0f} steps/s"
@@ -910,7 +884,6 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
             dpg.render_dearpygui_frame()
             dpg.run_callbacks(dpg.get_callback_queue())
         self.stop()
-        self.scratch.close()
         dpg.destroy_context()
 
 

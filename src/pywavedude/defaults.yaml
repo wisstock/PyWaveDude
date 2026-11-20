@@ -80,8 +80,8 @@ new_project:
     quality: 85                         # Quality
     graphs_in_preview: false             # Graphs on the canvas
     probe_colours: true                 # Probe curves per colour
-    grid: false                         # Grid
-    grid_step: 50                       # Grid step
+    grid: true                          # Grid
+    grid_step: 25                       # Grid step
     grid_opacity: 0.25                  # Grid opacity
     grid_snap: true                     # Snap to grid
     true_colour: true                   # True colour intensity
