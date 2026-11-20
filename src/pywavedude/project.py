@@ -143,7 +143,7 @@ PART_ELEMENTS = {
     "InterferenceFilter": pm.InterferenceFilterPart, "SimpleGrating": pm.SimpleGratingPart,
     "FacettedGrating": pm.FacettedGratingPart, "MetaLens": pm.MetaLensPart, "MetaPrism": pm.MetaPrismPart,
     "MetaAxicon": pm.MetaAxiconPart, "FresnelLens": pm.FresnelLensPart,
-    "PhaseStepPlate": pm.PhaseStepPlatePart,         # this port only
+    "PhaseStepPlate": pm.PhaseStepPlatePart, "DichroicMirror": pm.DichroicMirrorPart,   # this port only
 }
 ELEMENT_OF = {cls: name for name, cls in PART_ELEMENTS.items()}
 # what an absent attribute means in a file: the C# initialisers, where a new part from the tree is set up otherwise

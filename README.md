@@ -28,6 +28,7 @@ uv run pywavedude                         # new project, blank canvas
 uv run pywavedude scene.png               # new project on a scene image
 uv run pywavedude project.wdproj          # open a saved project
 uv run pywavedude examples/sted.wdproj    # example: STED focus with a phase step plate, true colour
+uv run pywavedude examples/dichroic.wdproj  # example: dichroic mirror splitting two wavelengths
 uv run pywavedude --backend cpu           # force a compute backend: auto | cpu | mlx
 uv run pywavedude --defaults my.yaml      # start with another defaults file
 ```
@@ -44,6 +45,23 @@ First steps:
    step 0 with the timeline kept in place: the picture there updates once the new run reaches it
    (switch: *Re-run automatically after edits*).
 7. **Stop** (Shift + F5): discards the computed simulation. **File → Export** saves a video.
+
+## Usage
+
+| Task | Steps |
+|---|---|
+| Set the canvas | **Scene**: width, height, background index; or **File → Open scene image** (index, emitters and absorption painted as colours) |
+| Set the wavelength scale | **Simulation → Wavelength at frequency 100 (px)**; keep the shortest wavelength ≥ ~8 px (≥ 20 px for thin-film parts) |
+| Make a plane wave | **+ Source**, then *Composite source* on, *Columns* 1, *Rows* N, *Vertical spacing* 2–4 px: a line of emitters radiating a beam to both sides |
+| Make a pulse | source *Mode* Pulsed, *Pulse width* / *Off width* in cycles |
+| Give a source a wavelength | source *Wavelength (px)* (sets *Frequency*) |
+| Add optics | **+ Part ▼** → kind → click the canvas; drag to move, lever to rotate, corner grip to resize; settings in **Properties** |
+| Mix wavelengths | sources of different frequencies; **Separate wavelengths** on (view row) for per-wavelength intensity, **True colour** to show them in colour |
+| Measure | **+ Probe ▼** → Point: one click; Line or detector: two clicks (A, B); graphs in the **Probe graphs** column |
+| Absorb at the canvas edge | **Scene**: *Edges* (open or reflective), *Damping edge* (rim width) |
+| Compute | **Run** (F5); edits after a run start a new run automatically |
+| Inspect | **Play** (Space), scrub the timeline, zoom (wheel) and pan (drag) the pictures, **Auto** brightness |
+| Save results | **File → Save** (`.wdproj`), **File → Export** (video, frames, EXR), **Export CSV** (probe data), **Save shown picture as PNG** |
 
 ## Features
 
@@ -82,45 +100,106 @@ Scene image channels:
 
 ### Sources
 
-| Setting | Values |
-|---|---|
-| Frequency level | 0.01–255; or *Wavelength (px)* beside it, which sets the frequency |
-| Amplitude, phase | 0–100 %, −180…180° |
-| Emission | continuous · pulsed (Gaussian or smoothed square, pulse/off width in cycles) |
-| Detach step | stop driving the cell after a given step |
-| Composite | grid of columns × rows, spacing, rotation |
-| Random spread | per element: position, frequency, phase, off width |
+| Type | How | Result |
+|---|---|---|
+| Point | default source | circular wave |
+| Line / plane wave | *Composite*: 1 column × N rows, spacing 2–4 px | beam along ±x, width N × spacing |
+| Array | *Composite*: columns × rows, spacings, *Rotation* | phased array, grating of emitters, rotated beam |
+| Random / incoherent | *Composite* + random spread | partially coherent light, speckle |
+| Pulsed | *Mode* Pulsed | wave packets |
+| Image sources | green channel of a scene image, *Image sources* on in Scene (*Image source amplitude*) | emitters of any shape |
+
+| Setting | Values | Meaning |
+|---|---|---|
+| X, Y | px | position (array centre) |
+| Frequency | 0.01–255 | frequency level; *Wavelength (px)* beside it shows and sets the same |
+| Amplitude | 0–100 % | drive amplitude |
+| Phase | −180…180° | phase offset against other sources of the same frequency |
+| Mode | Continuous, Pulsed | emission |
+| Pulse shape | Gaussian, SmoothedSquare | envelope of a pulse |
+| Pulse width, Off width | cycles | on-span and pause of a pulse train |
+| Detach after step | −1 = never | stop driving the cell; it becomes ordinary medium |
+| Composite source | on/off | many emitters from one source |
+| Columns, Rows | count | array size |
+| Horizontal / vertical spacing | px | emitter distance |
+| Rotation | degrees | array angle |
+| Randomisation: Frequency, Phase, Off width, Position | ± level, °, cycles, px; 0 = off | per-emitter spread (seeded by the project seed) |
 
 ### Optical parts
 
-| Group | Parts |
+Common settings:
+
+| Setting | Meaning |
 |---|---|
-| Lenses | lens (spherical surfaces, convex/concave), Fresnel lens, GRIN lens |
-| Shapes | rectangle, ellipse, polygon, triangle, free outline |
-| Waveguides | fibre (Bézier path, core/cladding, absorbing band) |
-| Layers | Bragg reflector, interference filter |
-| Gratings | simple dot grating, facetted grating (sawtooth, square, sine), diffuser |
-| Diffractive | zone plate, meta lens, meta prism, meta axicon |
-| Phase plates | phase step plate: zones across the aperture alternate by a set phase delay (thickness from the design wavelength); 2 zones × 180° = 2D counterpart of a vortex plate (dark on-axis focus, STED depletion) |
-| Logic | XOR, AND, OR waveguide gates |
+| Name, Enabled | label; a disabled part is not painted |
+| X, Y, Angle | centre and rotation (counter-clockwise); a part's axis is its x direction |
+| Mirror | the body reflects everything (glass otherwise) |
+| Refractive index | 1.00–2.55 |
+| Anti-reflection coating | band width in px, profile *Layer* (band of index √n) or *Graded*; front / back / sides on or off |
+| Absorption, Absorption ramp | 0–255 absorption of the body, reached over a ramp in px from the surface |
 
-Common part settings: position, rotation, mirror or glass, refractive index, anti-reflection coating (layer or
-graded, per face), absorption with ramp. Edges are anti-aliased.
+| Group | Part | Main settings |
+|---|---|---|
+| Lenses and mirrors | Lens | Diameter, R1, R2 (sign = convex / concave; *Flip* button), Centre thickness; read-out: edge thickness, fitted radii, focal and back focal length |
+| | Fresnel lens | lens settings + Zones, Zone division (EqualWidth, EqualDepth) |
+| | GRIN lens | Length, Diameter, Centre index, Edge index (parabolic profile) |
+| Shapes | Rectangle, Ellipse | Length, Width |
+| | Polygon | Number of sides, Side length |
+| | Triangle | Base, Type (Equilateral, RightIsosceles, ThirtySixtyNinety, Isosceles, Custom), Angle A, Angle B |
+| | Outline | Points (drag them on the canvas) |
+| Waveguides | Fibre | Core index, Core diameter, Cladding index, Cladding thickness, Ends (Flat, Round), Nodes with Bézier handles, cladding absorption |
+| Layers | Bragg reflector | Layer pairs, Thickness 1/2, Index 1/2, Width |
+| | Interference filter | Length, Width, Layers (`thickness@index; …`, front to back) |
+| | Dichroic mirror | Type, Cut-off frequency, Design angle, Layer pairs, High / Low index, Half-thickness end layers, Medium index, Substrate thickness, Width |
+| Diffraction gratings | Grating | Columns, Rows, Column / Row spacing, Dot diameter |
+| | Facetted grating | Length, Width, Pattern (Sawtooth, SquareWave, Sinusoidal), Pitch, Amplitude |
+| | Diffuser | Length, Width, Centre wavelength, Amplitude, Sigma (random rough front face) |
+| Diffractive optics | Zone plate | Diameter, Thickness, Target frequency, Focal length, Inverse, Mount, Mount width |
+| | Meta lens | Length, Width, Target frequency, Pitch, Height, Pattern index, Focal length, Lens type (Converging, Diverging) |
+| | Meta prism | meta settings + Deflection (degrees) |
+| | Meta axicon | meta settings + Cone angle (degrees) |
+| Phase plates | Phase step plate | Aperture, Base thickness, Zones, Phase step, Design frequency, Medium index; 2 zones × 180° = 2D vortex plate (dark on-axis focus, STED depletion) |
+| Logic gates | XOR, AND, OR gate | Design frequency, Core index, Cladding index, Port spacing, AR on input / output side, Upper / Lower output |
 
-Wavelength-designed parts (zone plate, meta surfaces, gates, phase step plate) take a *Design wavelength (px)* beside
-their design frequency.
+Wavelength-designed parts (zone plate, meta surfaces, gates, phase step plate, dichroic mirror) show a
+*Design wavelength (px)* beside their design frequency; typing it sets the frequency. Lens focal lengths use the
+thick-lens lensmaker's formula in the blank canvas's background index (Fresnel lens as thin).
 
-Lens read-out: edge thickness, fitted radii, effective and back focal length (thick-lens lensmaker's formula from
-the fitted radii, in the blank canvas's background index; Fresnel lens as thin).
+#### Dichroic mirror
+
+| Item | Description |
+|---|---|
+| Structure | substrate (Substrate thickness, Refractive index) with a quarter-wave stack of High / Low index on its front (−x) face |
+| Layer thickness | d = λ0 / (4 · n · cos θ), θ from the Design angle by Snell's law in each layer |
+| Reflected band | λ0 / (1 + Δg) … λ0 / (1 − Δg), Δg = (2/π) · arcsin((ηH − ηL) / (ηH + ηL)), η = n · cos θ |
+| Longpass | reflects the band just below the cut-off, passes longer waves; periods H/2 L H/2 |
+| Shortpass | reflects the band just above the cut-off, passes shorter waves; periods L/2 H L/2 |
+| Band | reflects a band centred on the cut-off; periods H L |
+| Placement | a new mirror is rotated 45°: a beam travelling along +x meets the stack at 45°; the reflected beam leaves downwards (+y) |
+| Read-out | cut-off and band centre, reflected band in px and frequency levels, peak R, layer and stack thickness, R and T for every source (transfer-matrix method, s-polarisation), warning for layers under 2 px |
 
 ### Probes
 
-| Type | Output |
-|---|---|
-| Point | field amplitude, intensity, or integrated intensity per step |
-| Line (A → B) | field or intensity profile per frame, or integrated profile |
-| Counting detector | random detections along a line per step (photomultiplier) |
-| Imaging detector | accumulated detections per pixel bin (photon-counting array) |
+| Type | Placed by | Output |
+|---|---|---|
+| Point (field / intensity) | one click | field amplitude, intensity, or integrated intensity per step |
+| Line (A → B) | two clicks | field or intensity profile per frame, or integrated profile |
+| Counting detector | two clicks | random detections along a line per step (photomultiplier) |
+| Imaging detector | two clicks | accumulated detections per pixel bin (photon-counting array) |
+
+| Setting | Values | Meaning |
+|---|---|---|
+| Layer | Field, Intensity | what is measured |
+| Measurement | Amplitude, Value, IntegratedValue | raw field, value, or running sum |
+| Kind | Point, Line | point A, or the line A → B |
+| Detector | Standard, Counting, Imaging | plain probe or photon detector |
+| A x/y, B x/y | px | ends (drag them on the canvas) |
+| Start after step | step | ignore the start-up transient |
+| Detector sensitivity, Bin size | value, px | detection rate; imaging bin width |
+| Box size, Box x/y/width/height | Tiny … ExtraLarge, Custom | graph box on the canvas |
+| Step axis, Window | Running / Full, steps | running window or the whole run |
+| Auto-scale steps / values, Value minimum / maximum | on/off, values | graph ranges |
+| Value axis, Decades | Linear / Logarithmic, count | value scale |
 
 - Live graphs: in the **Probe graphs** column at the right edge of the window (opens when a run with probes
   starts; switch: *Graph column*), and optionally in boxes over the picture of the layer the probe measures (switch:

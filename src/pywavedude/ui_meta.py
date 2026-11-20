@@ -99,11 +99,34 @@ OWN = {
     ("PhaseStepPlatePart", "design_frequency"): FieldMeta("Design frequency", "The source frequency level the step "
                                                           "height is made for.", "Design"),
     ("PhaseStepPlatePart", "medium_index"): FieldMeta("Medium index", "Refractive index around the plate.", "Design"),
+    ("DichroicMirrorPart", "length"): FieldMeta("Substrate thickness", "Thickness of the substrate behind the "
+                                                "stack, in pixels.", "Plate"),
+    ("DichroicMirrorPart", "width"): FieldMeta("Width", "Width of the mirror across its axis, in pixels.", "Plate"),
+    ("DichroicMirrorPart", "mode"): FieldMeta(
+        "Type", "Longpass: reflects the band just below the cut-off wavelength, passes longer waves. Shortpass: "
+        "reflects the band just above it, passes shorter waves. Band: reflects a band centred on it.", "Design"),
+    ("DichroicMirrorPart", "design_frequency"): FieldMeta("Cut-off frequency", "The source frequency level at the "
+                                                          "band edge (Band: at its centre).", "Design"),
+    ("DichroicMirrorPart", "design_angle"): FieldMeta("Design angle", "Angle of incidence the layers are made for, "
+                                                      "in degrees from the normal (0–80).", "Design"),
+    ("DichroicMirrorPart", "pairs"): FieldMeta("Layer pairs", "High/low index periods; more pairs reflect more and "
+                                               "sharpen the edges.", "Design"),
+    ("DichroicMirrorPart", "index_high"): FieldMeta("High index", "Refractive index of the high layers.", "Design"),
+    ("DichroicMirrorPart", "index_low"): FieldMeta("Low index", "Refractive index of the low layers; the larger the "
+                                                   "contrast, the wider the band.", "Design"),
+    ("DichroicMirrorPart", "smooth_edges"): FieldMeta("Half-thickness end layers", "Edge-filter periods (L/2 H L/2 "
+                                                      "or H/2 L H/2) that flatten the passband ripple.", "Design"),
+    ("DichroicMirrorPart", "medium_index"): FieldMeta("Medium index", "Refractive index the light arrives from.",
+                                                      "Design"),
 }
 OWN_KINDS = {"PhaseStepPlatePart": "A phase step plate, the 2D counterpart of a vortex phase plate: the aperture is "
                                    "split across the beam into zones that alternate between two thicknesses, so "
                                    "neighbouring zones delay the wave by the phase step. Two zones at 180° give a "
-                                   "focus with a dark zero on the axis between two lobes, as used for STED depletion."}
+                                   "focus with a dark zero on the axis between two lobes, as used for STED depletion.",
+             "DichroicMirrorPart": "A dichroic mirror: a substrate whose front face carries a quarter-wave stack of "
+                                   "two indices, designed for a cut-off wavelength at an angle of incidence. One band "
+                                   "of wavelengths is reflected by thin-film interference, the rest passes. The stack "
+                                   "faces the part's −x side; rotate the part to the design angle."}
 CATEGORY_ORDER = ["General", "Position", "Canvas", "Sources", "Run", "Compute", "Solver", "Wave", "Pulsing", "Array",
                   "Grid", "Randomisation", "Measurement", "Graph", "Axes", "Preview", "Outputs", "Rendering",
                   "True colour", "Scene outline", "Video", "Export"]

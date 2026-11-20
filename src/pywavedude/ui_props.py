@@ -63,7 +63,8 @@ LIST_HINTS = {
 
 
 # --------------------------------------------------------------------- read-outs
-def readouts(obj, medium: float = 1.0) -> list[str]:
+def readouts(obj, medium: float = 1.0, sources=()) -> list[str]:
+    """Derived values shown under the form; ``sources``: the project's enabled sources, for per-source values."""
     from .engine.sources import PointSource
     out = []
     if isinstance(obj, PointSource):
@@ -106,8 +107,35 @@ def readouts(obj, medium: float = 1.0) -> list[str]:
             out.append(f"Wavelength {d.wavelength:.1f} px, core {d.core_width} px, coupler gap {d.gap} px, "
                        f"coupler {d.coupler_length} px, length {d.length} px, port spacing {d.port_spacing} px")
             out.append(f"Outputs: upper {obj.outputs[0]}, lower {obj.outputs[1]}")
+    if isinstance(obj, m.DichroicMirrorPart):
+        out += _dichroic_readouts(obj, sources)
     if isinstance(obj, m.BraggReflectorPart):
         out.append(f"Length {obj.pairs * (obj.thickness1 + obj.thickness2)} px")
+    return out
+
+
+def _dichroic_readouts(d: m.DichroicMirrorPart, sources) -> list[str]:
+    layers = d.layers
+    if not layers:
+        return ["No stack: check the cut-off frequency and the design angle"]
+    a, b = d.band
+    hi_n, lo_n = max(l.refractive_index for l in layers), min(l.refractive_index for l in layers)
+    quarter = lambda n: max(l.thickness for l in layers if l.refractive_index == n)  # noqa: E731
+    lv = lambda lam: _level_for(lam, d.frequency_scale)  # noqa: E731
+    out = [f"Cut-off {d.cutoff:.1f} px, band centre {d.centre:.1f} px",
+           f"Reflected band {a:.1f}–{b:.1f} px (frequency {lv(b):.1f}–{lv(a):.1f}), peak R "
+           f"{d.reflectance(d.centre) * 100:.1f} %",
+           f"{len(layers)} layers: high {quarter(hi_n):.2f} px, low {quarter(lo_n):.2f} px, "
+           f"stack {d.stack_thickness:.1f} px"]
+    thin = min(quarter(hi_n), quarter(lo_n))
+    if thin < 2.0:
+        out.append(f"Quarter-wave layer {thin:.2f} px: too thin for the grid to resolve; use a longer wavelength")
+    for s in sources:
+        if not getattr(s, "enabled", True):
+            continue
+        lam = _lambda_of(s.level, d.frequency_scale)
+        r = d.reflectance(lam)
+        out.append(f"{s.name or 'Source'} (λ {lam:.1f} px): R {r * 100:.0f} %, T {(1 - r) * 100:.0f} %")
     return out
 
 
@@ -193,9 +221,9 @@ class Editor:
     def __init__(self, obj, parent, on_change: Callable[[str], None], *, medium: Callable[[], float] = lambda: 1.0,
                  choices: Callable[[object, str], list | None] = lambda o, n: None,
                  extras: Callable[[object], None] = lambda o: None, hidden: set = frozenset(),
-                 computed: Callable[[object], list] = lambda o: []):
+                 computed: Callable[[object], list] = lambda o: [], sources: Callable[[], list] = lambda: []):
         self.obj, self.parent, self.on_change = obj, parent, on_change
-        self.computed = computed
+        self.computed, self.sources = computed, sources
         self.medium, self.choices, self.extras, self.hidden = medium, choices, extras, set(hidden)
         self.widgets: dict[str, int] = {}
         self.readout_ids: list[int] = []
@@ -347,7 +375,7 @@ class Editor:
         self._readouts()
 
     def _readouts(self) -> None:
-        lines = readouts(self.obj, self.medium())
+        lines = readouts(self.obj, self.medium(), self.sources())
         if len(lines) == len(self.readout_ids):
             for t, line in zip(self.readout_ids, lines):
                 if dpg.get_value(t) != line:

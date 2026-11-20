@@ -64,3 +64,28 @@ def test_lens_focal_length():
     assert thin.focal_lengths()[0] == pytest.approx(1000.0, rel=1e-3)          # R / (2 (n - 1))
     assert thin.focal_lengths(1.5)[0] == math.inf                                   # index matched: no power
     assert m.LensPart(mirror=True).focal_lengths() is None
+
+
+def test_thin_film_quarter_wave_stack():
+    from pywavedude.parts import thinfilm as tf
+    lam, nh, nl = 30.0, 2.3, 1.45
+    stack = [(tf.quarter_wave(nh, lam, 1.0, 0.0), nh), (tf.quarter_wave(nl, lam, 1.0, 0.0), nl)] * 8
+    assert stack[0][0] == pytest.approx(lam / 4 / nh)
+    assert tf.reflectance([], lam, 1.0, 1.5, 0.0) == pytest.approx(0.04)                 # bare glass, (n-1)²/(n+1)²
+    assert tf.reflectance(stack, lam, 1.0, 1.5, 0.0) > 0.99                              # in the band
+    assert tf.reflectance(stack[:2], lam / 2, 1.0, 1.5, 0.0) == pytest.approx(0.04, abs=1e-6)  # half waves: absent
+    assert tf.quarter_wave(nh, lam, 1.0, 45.0) > stack[0][0]                             # oblique: thicker
+
+
+@pytest.mark.parametrize("mode", list(m.DichroicMode))
+def test_dichroic_mirror_band_at_the_cutoff(mode):
+    d = m.DichroicMirrorPart(mode=mode, design_frequency=50.0)
+    a, b = d.band
+    edge = {m.DichroicMode.LONGPASS: b, m.DichroicMode.SHORTPASS: a}.get(mode, d.centre)
+    assert edge == pytest.approx(d.cutoff)
+    assert d.reflectance(d.centre) > 0.99
+    passband = {m.DichroicMode.LONGPASS: np.linspace(b * 1.1, b * 1.6, 30),
+                m.DichroicMode.SHORTPASS: np.linspace(a * 0.6, a * 0.9, 30)}.get(mode)
+    if passband is not None:
+        assert np.mean([d.reflectance(lam) for lam in passband]) < 0.15
+    assert d.stack_thickness == pytest.approx(sum(l.thickness for l in d.layers))

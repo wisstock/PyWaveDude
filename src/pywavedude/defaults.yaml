@@ -303,6 +303,28 @@ new_objects:
       phase_step: 180.0                   # Phase step
       design_frequency: 50.0              # Design frequency
       medium_index: 1.0                   # Medium index
+    DichroicMirrorPart:                    # Dichroic mirror
+      enabled: true                       # Enabled
+      angle: 45.0                         # Angle: a beam along +x meets the stack at 45°
+      coating: 0                          # AR coating
+      coating_profile: Layer              # Coating profile
+      front_coated: false                 # Coat the front
+      back_coated: true                   # Coat the back
+      sides_coated: false                 # Coat the sides
+      mirror: false                       # Mirror
+      refractive_index: 1.5               # Substrate refractive index
+      absorption: 0                       # Absorption
+      absorption_ramp: 40                 # Absorption ramp
+      length: 40                          # Substrate thickness
+      width: 400                          # Width
+      mode: Longpass                      # Type: Longpass, Shortpass, Band
+      design_frequency: 50.0              # Cut-off frequency
+      design_angle: 45.0                  # Design angle
+      pairs: 8                            # Layer pairs
+      index_high: 2.3                     # High index
+      index_low: 1.45                     # Low index
+      smooth_edges: true                  # Half-thickness end layers
+      medium_index: 1.0                   # Medium index
     DiffuserPart:                    # Diffuser
       enabled: true                       # Enabled
       angle: 0.0                          # Angle

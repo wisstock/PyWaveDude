@@ -338,7 +338,7 @@ class RectShape(PartShape):
 class FilterStackShape(PartShape):
     depth_is_distance = True
 
-    def __init__(self, f: m.InterferenceFilterPart):
+    def __init__(self, f: m.InterferenceFilterPart | m.DichroicMirrorPart):
         super().__init__(f)
         layers = [l for l in f.layers if l.guarded_thickness > 0]
         self.inner = -max(1, f.length) / 2.0
@@ -797,7 +797,7 @@ class LogicGateShape(PartShape):
 # ====================================================================== dispatch
 def pieces_of(part: m.OpticalPart) -> list[PartShape]:
     """The shapes a part paints, in painting order (port of ``PartShape.PiecesOf``)."""
-    if isinstance(part, m.InterferenceFilterPart):
+    if isinstance(part, (m.InterferenceFilterPart, m.DichroicMirrorPart)):
         plate = RectShape(part, part.length, part.width)
         if not any(l.guarded_thickness > 0 for l in part.layers):
             return [plate]

@@ -422,6 +422,94 @@ class InterferenceFilterPart(ShapePart):
         return [(front, -w), (back, -w), (back, w), (front, w)]
 
 
+class DichroicMode(str, Enum):
+    LONGPASS = "Longpass"      # reflects the band just below the cut-off wavelength, passes longer waves
+    SHORTPASS = "Shortpass"    # reflects the band just above the cut-off wavelength, passes shorter waves
+    BAND = "Band"              # reflects a band centred on the cut-off wavelength
+
+
+@dataclass
+class DichroicMirrorPart(ShapePart):
+    """A dichroic mirror: a substrate whose front (-x) face carries a quarter-wave stack of two indices, designed
+    for a cut-off wavelength at an angle of incidence, so one band of wavelengths is reflected and the rest passes.
+
+    Every layer is a quarter wave thick at the band centre λ0 for the design angle; λ0 is placed so the band's
+    long edge (Longpass), short edge (Shortpass) or centre (Band) falls on the cut-off. Edge layers of half
+    thickness (H/2 L H/2 periods for Longpass, L/2 H L/2 for Shortpass) flatten the ripple in the passband."""
+    length: int = 40
+    width: int = 400
+    mode: DichroicMode = DichroicMode.LONGPASS
+    design_frequency: float = 50.0
+    design_angle: float = 45.0
+    pairs: int = 8
+    index_high: float = 2.3
+    index_low: float = 1.45
+    smooth_edges: bool = True
+    medium_index: float = 1.0
+    frequency_scale: float = 2.0
+
+    stem = "Dichroic mirror"
+
+    stack_thickness = InterferenceFilterPart.stack_thickness
+    vertices = InterferenceFilterPart.vertices
+
+    @property
+    def cutoff(self) -> float:
+        """Cut-off wavelength in vacuum pixels."""
+        return wavelength_of(self.design_frequency, self.frequency_scale)
+
+    def _indices(self):
+        g = lambda v: min(max(v, MIN_INDEX), MAX_INDEX) if math.isfinite(v) else 1.5  # noqa: E731
+        return g(self.index_high), g(self.index_low), g(self.medium_index), \
+            min(max(self.design_angle, 0.0), 80.0) if math.isfinite(self.design_angle) else 0.0
+
+    @property
+    def half_width(self) -> float:
+        from .thinfilm import band_half_width
+        nh, nl, n0, ang = self._indices()
+        return min(band_half_width(nh, nl, n0, ang), 0.9)
+
+    @property
+    def centre(self) -> float:
+        """Band centre λ0 in vacuum pixels."""
+        dg = self.half_width
+        return self.cutoff * {DichroicMode.LONGPASS: 1 - dg, DichroicMode.SHORTPASS: 1 + dg}.get(self.mode, 1.0)
+
+    @property
+    def band(self) -> tuple[float, float]:
+        """Reflection band (short edge, long edge) in vacuum pixels."""
+        dg, c = self.half_width, self.centre
+        return c / (1 + dg), c / (1 - dg)
+
+    @property
+    def layers(self) -> list[FilterLayer]:
+        """The stack, front (facing the medium) first."""
+        from .thinfilm import quarter_wave
+        nh, nl, n0, ang = self._indices()
+        lam = self.centre
+        if not (math.isfinite(lam) and lam > 0):
+            return []
+        h = quarter_wave(nh, lam, n0, ang)
+        lo = quarter_wave(nl, lam, n0, ang)
+        if not (math.isfinite(h) and math.isfinite(lo)):
+            return []
+        n = min(max(self.pairs, 1), 100)
+        H, L = (h, nh), (lo, nl)
+        if self.smooth_edges and self.mode != DichroicMode.BAND:
+            outer, inner = (H, L) if self.mode == DichroicMode.LONGPASS else (L, H)
+            seq = [(outer[0] / 2, outer[1])] + [inner, outer] * (n - 1) + [inner, (outer[0] / 2, outer[1])]
+        else:
+            seq = [H, L] * n + [H]
+        return [FilterLayer(round(d, 3), n_) for d, n_ in seq]
+
+    def reflectance(self, lam: float) -> float:
+        """Reflectance of the stack at vacuum wavelength ``lam`` (px) for the design angle, s-polarised."""
+        from .thinfilm import reflectance
+        _, _, n0, ang = self._indices()
+        sub = min(max(self.refractive_index, MIN_INDEX), MAX_INDEX)
+        return reflectance([(l.thickness, l.refractive_index) for l in self.layers], lam, n0, sub, ang)
+
+
 @dataclass
 class BraggReflectorPart(OpticalPart):
     pairs: int = 10
@@ -891,6 +979,7 @@ class OrGatePart(LogicGatePart):
 PART_TYPES: dict[str, type[OpticalPart]] = {
     cls.stem: cls for cls in (
         LensPart, FresnelLensPart, PolygonPart, RectanglePart, EllipsePart, TrianglePart, OutlinePart, FiberPart,
-        BraggReflectorPart, GrinLensPart, ZonePlatePart, PhaseStepPlatePart, DiffuserPart, InterferenceFilterPart, SimpleGratingPart,
+        BraggReflectorPart, GrinLensPart, ZonePlatePart, PhaseStepPlatePart, DiffuserPart, InterferenceFilterPart,
+        DichroicMirrorPart, SimpleGratingPart,
         FacettedGratingPart, MetaLensPart, MetaPrismPart, MetaAxiconPart, XorGatePart, AndGatePart, OrGatePart)
 }

@@ -19,7 +19,7 @@ SIZE_FIELDS = {
     pm.LensPart: ("thickness", "diameter"), pm.GrinLensPart: ("length", "diameter"),
     pm.ZonePlatePart: ("thickness", "diameter"), pm.PhaseStepPlatePart: ("base_thickness", "aperture"),
     pm.RectanglePart: ("length", "width"), pm.EllipsePart: ("length", "width"), pm.DiffuserPart: ("length", "width"),
-    pm.InterferenceFilterPart: ("length", "width"), pm.FacettedGratingPart: ("length", "width"),
+    pm.InterferenceFilterPart: ("length", "width"), pm.DichroicMirrorPart: ("length", "width"), pm.FacettedGratingPart: ("length", "width"),
     pm.MetaSurfacePart: ("length", "width"), pm.BraggReflectorPart: (None, "width"),
 }
 

@@ -26,7 +26,7 @@ PART_MENU = (
     ("Lenses and mirrors", ("Lens", "Fresnel lens", "GRIN lens")),
     ("Shapes", ("Rectangle", "Ellipse", "Polygon", "Triangle", "Outline")),
     ("Waveguides", ("Fiber",)),
-    ("Layers", ("Bragg reflector", "Interference filter")),
+    ("Layers", ("Bragg reflector", "Interference filter", "Dichroic mirror")),
     ("Diffraction gratings", ("Grating", "Facetted grating", "Diffuser")),
     ("Diffractive optics", ("Zone plate", "Meta lens", "Meta prism", "Meta axicon")),
     ("Phase plates", ("Phase step plate",)),
@@ -345,7 +345,8 @@ class TreeMixin:
         self._editor = Editor(obj, "props_body", lambda name: self._prop_changed(obj, name),
                               medium=self._medium, choices=self._field_choices, extras=self._form_extras,
                               hidden=hidden,
-                              computed=lambda o: computed_fields(o, self.p.sim.source_frequency_scale))
+                              computed=lambda o: computed_fields(o, self.p.sim.source_frequency_scale),
+                              sources=lambda: self.p.sources)
 
     def _medium(self) -> float:
         s = self.p.scene

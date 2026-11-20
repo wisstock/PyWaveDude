@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Version="4" Seed="1156206410">
+	<Description>A longpass dichroic mirror at 45°: the short-wavelength beam (blue) lies in the stack's reflection band and is turned by 90°, the long-wavelength beam (red) passes. Wavelengths run separately; the intensity is shown in true colour. Probes measure the reflected and the transmitted beam.</Description>
+	<Scene Width="1400" Height="1000" />
+	<Simulation Steps="1600" />
+	<Display>
+		<Field ColorScheme="Default field" BlackLevel="-0.05" />
+		<Intensity ColorScheme="Default intensity" />
+	</Display>
+	<PyWaveDude SplitWavelengths="true" />
+	<Source Name="Red" X="200" Y="300" Frequency="36">
+		<Array SizeY="50" SpacingY="4" />
+	</Source>
+	<Source Name="Blue" X="203" Y="300" Frequency="62">
+		<Array SizeY="50" SpacingY="4" />
+	</Source>
+	<DichroicMirror Name="Dichroic mirror 1" X="650" Y="300" Angle="45" FrontCoated="false" SidesCoated="false" Width="500" />
+	<Probe Name="Transmitted" Layer="Intensity" Measurement="Value" Kind="Line" AX="1150" AY="120" BX="1150" BY="480" />
+	<Probe Name="Reflected" Layer="Intensity" Measurement="Value" Kind="Line" AX="470" AY="850" BX="830" BY="850" />
+</Project>

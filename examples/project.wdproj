@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Version="4" Seed="1">
+	<Description>STED in 2D: the depletion beam (red, longer wavelength) passes a two-zone phase step plate and the objective, giving a focus with a dark zero on the axis around the excitation focus (blue). Wavelengths run separately; the intensity is shown in true colour.</Description>
+	<Scene Width="1800" Height="400" />
+	<Simulation Steps="1400" />
+	<Display>
+		<Field ColorScheme="Default field" Brightness="22.922138469172474" BlackLevel="-0.05" />
+		<Intensity ColorScheme="Default intensity" Brightness="26.119070494077572" />
+	</Display>
+	<PyWaveDude SplitWavelengths="true" GraphsInPreview="true" Grid="true" GridStep="20" GridOpacity="0.11999999731779099" TrueColour="false" />
+	<Source Name="Source 1" X="420" Y="200" Frequency="160.2212">
+		<Array SizeX="5" SpacingY="4" />
+	</Source>
+	<Lens Name="Lens 1" X="640" Y="200" />
+	<Lens Name="Lens 2" X="840" Y="200" />
+	<PhaseStepPlate Name="Phase step plate 1" X="745" Y="200" Aperture="200" DesignFrequency="160.2212" />
+	<Probe Name="Probe 1" Layer="Intensity" Measurement="Value" Kind="Line" AX="1190" AY="60" BX="1190" BY="340" BoxSize="Custom" BoxX="980" BoxY="13" BoxWidth="190" BoxHeight="101" />
+</Project>
