@@ -148,6 +148,7 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         self.history.start(p)
         self._sim_edit = self._probe_edit = False
         self._set_position(0, by_user=False)
+        self.view_zoom, self.view_x, self.view_y = 1.0, 0.0, 0.0
         self._layout_dirty = True
         self._refresh_tree()
         self._show_props()
@@ -524,6 +525,9 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
             dpg.add_key_press_handler(callback=self._on_key)
             dpg.add_mouse_click_handler(button=dpg.mvMouseButton_Left, callback=self._on_click)
             dpg.add_mouse_double_click_handler(button=dpg.mvMouseButton_Left, callback=self._on_double_click)
+            dpg.add_mouse_wheel_handler(callback=self._on_wheel)
+            dpg.add_mouse_click_handler(button=dpg.mvMouseButton_Right, callback=self._on_pan_click)
+            dpg.add_mouse_click_handler(button=dpg.mvMouseButton_Middle, callback=self._on_pan_click)
         dpg.setup_dearpygui()
         dpg.show_viewport()
         dpg.set_primary_window("main", True)
@@ -595,6 +599,9 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
                     for z in ZOOMS():
                         dpg.add_menu_item(label=f"{z:g}×", check=True, tag=f"zoom_{z}", user_data=z,
                                           callback=lambda s, a, u: self._set_zoom(u))
+                dpg.add_menu_item(label="Zoom in", shortcut="Ctrl+=", callback=lambda: self._zoom_at(1.25))
+                dpg.add_menu_item(label="Zoom out", shortcut="Ctrl+-", callback=lambda: self._zoom_at(0.8))
+                dpg.add_menu_item(label="Whole canvas", shortcut="Ctrl+0", callback=self._zoom_fit)
                 dpg.add_separator()
                 for label, attr in (("Grid", "grid"), ("Handles in the preview", "handles"),
                                     ("Labels in the preview", "labels"),
@@ -715,6 +722,9 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
             action = {dpg.mvKey_N: self._new_cb, dpg.mvKey_O: lambda: dpg.show_item("proj_dlg"),
                       dpg.mvKey_S: (lambda: dpg.show_item("save_dlg")) if shift else self._save_cb,
                       dpg.mvKey_E: self._export_last, dpg.mvKey_Y: self._redo,
+                      dpg.mvKey_Plus: lambda: self._zoom_at(1.25), dpg.mvKey_Add: lambda: self._zoom_at(1.25),
+                      dpg.mvKey_Minus: lambda: self._zoom_at(0.8), dpg.mvKey_Subtract: lambda: self._zoom_at(0.8),
+                      dpg.mvKey_0: self._zoom_fit,
                       dpg.mvKey_Z: self._redo if shift else self._undo}.get(key)
             if action is None and not self._typing():
                 action = {dpg.mvKey_X: self._cut, dpg.mvKey_C: self._copy, dpg.mvKey_V: self._paste,
@@ -808,6 +818,7 @@ class App(TreeMixin, PreviewMixin, TimelineMixin, ProbesMixin, ExportMixin, Dial
         now = time.perf_counter()
         self._update_export()
         self._update_drag()
+        self._update_pan()
         self._update_timeline_drag()
         self._update_stop_drag()
         # an edit has finished: an undo step, and (after a run) a new run

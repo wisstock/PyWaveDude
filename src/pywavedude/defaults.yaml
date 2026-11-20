@@ -20,6 +20,8 @@ app:
     pick_radius: 8                     # screen px: how close a click must be to a marker
     snap_radius: 8                     # screen px: how close a centre must come to a grid line
     lever_length: 28                   # screen px beyond the outline: the rotation lever
+    zoom_step: 1.2                     # zoom factor per mouse wheel notch
+    max_zoom: 32                       # largest canvas zoom (× the fitted view)
   playback:
     speed: 1.0                         # × the export frame rate
     speed_choices: [0.25, 0.5, 1, 2, 4, 8]

@@ -99,6 +99,14 @@ class TimelineMixin:
             self._tip(dpg.add_combo(("Stacked", "Side by side"), width=110, tag="arr_combo",
                                     callback=self._arrangement_changed), "Pictures one above the other or side by side")
         with dpg.group(horizontal=True, tag="view_row"):
+            self._tip(dpg.add_button(label="−", width=24, callback=lambda: self._zoom_at(0.8)),
+                      "Zoom out (Ctrl/Cmd + -, mouse wheel)")
+            self._tip(dpg.add_text("100 %", tag="zoom_text"), "Canvas zoom: wheel over a picture zooms at the "
+                      "pointer; drag with the right or middle button, or Alt + drag, to pan")
+            self._tip(dpg.add_button(label="+", width=24, callback=lambda: self._zoom_at(1.25)),
+                      "Zoom in (Ctrl/Cmd + =, mouse wheel)")
+            self._tip(dpg.add_button(label="Fit", callback=self._zoom_fit), "The whole canvas (Ctrl/Cmd + 0)")
+            dpg.add_spacer(width=14)
             self._tip(dpg.add_checkbox(label="Grid", tag="row_grid", callback=lambda s, v: self._row_set("grid", v)),
                       "Grid lines over the pictures (never exported)")
             dpg.add_text("step", color=th.TEXT_DIM)

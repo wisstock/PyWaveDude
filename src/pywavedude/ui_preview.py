@@ -50,6 +50,9 @@ class PreviewMixin:
         self._canvas_pick = False
         self._luts: dict = {}
         self._dots_key: dict = {}
+        self.view_zoom = 1.0          # 1 = the whole canvas fits the panel
+        self.view_x = self.view_y = 0.0   # canvas pixel at the panel's top-left corner
+        self._pan: dict | None = None
 
     # ------------------------------------------------------------ sizes and panels
     def _canvas_size(self) -> tuple[int, int]:
@@ -77,9 +80,11 @@ class PreviewMixin:
             k = min(avail_w / cw, (avail_h - n * HEADER_H - 6 * (n - 1)) / n / ch)
         k = max(k, 0.01)
         w, h = max(8, int(cw * k)), max(8, int(ch * k))
-        key = (tuple(layers), side, w, h)
+        key = (tuple(layers), side, w, h, cw, ch)
         if key == self._layout_key and not self._layout_dirty:
             return
+        if self._layout_key is not None and self._layout_key[4:] != key[4:]:
+            self.view_zoom, self.view_x, self.view_y = 1.0, 0.0, 0.0     # another canvas: the whole of it
         rebuild = self._layout_key is None or key[:2] != self._layout_key[:2] or self._layout_dirty
         self._layout_key = key
         self._layout_dirty = False
@@ -106,13 +111,77 @@ class PreviewMixin:
                     dots = dpg.add_draw_layer(parent=dl)
                     ovl = dpg.add_draw_layer(parent=dl)
                 self._panels.append(dict(layer=layer, dl=dl, img=img, grid=grid, dots=dots, ovl=ovl, title=title,
-                                         bright=b, attr=attr, legend=legend, k=k, w=w, h=h, ox=1.0, oy=1.0))
+                                         bright=b, attr=attr, legend=legend, kf=k, k=k, w=w, h=h, ox=1.0, oy=1.0,
+                                         vx=0.0, vy=0.0))
         else:
             for pn in self._panels:
                 dpg.configure_item(pn["dl"], width=w + 2, height=h + 2)
-                pn.update(k=k, w=w, h=h)
+                pn.update(kf=k, w=w, h=h)
+        self._apply_view()
+
+    # ------------------------------------------------------------ zoom and pan
+    def _apply_view(self) -> None:
+        """Every panel shows the same part of the canvas: ``view_zoom`` × the fit, from (view_x, view_y)."""
+        cw, ch = self._canvas_size()
+        self.view_zoom = min(max(self.view_zoom, 1.0), float(config.app("canvas.max_zoom", 32)))
+        if self._panels:
+            pn = self._panels[0]
+            vw, vh = pn["w"] / (pn["kf"] * self.view_zoom), pn["h"] / (pn["kf"] * self.view_zoom)
+            self.view_x = min(max(self.view_x, 0.0), max(0.0, cw - vw))
+            self.view_y = min(max(self.view_y, 0.0), max(0.0, ch - vh))
+        for pn in self._panels:
+            pn.update(k=pn["kf"] * self.view_zoom, vx=self.view_x, vy=self.view_y)
         self._dots_key.clear()
         self._redraw_all()
+        if dpg.does_item_exist("zoom_text"):
+            dpg.set_value("zoom_text", f"{self.view_zoom * 100:.0f} %")
+
+    def _zoom_at(self, factor: float, pn=None, at=None) -> None:
+        """Zoom by ``factor`` keeping the canvas point ``at`` (default: the view's centre) where it is."""
+        pn = pn or (self._panels[0] if self._panels else None)
+        if pn is None:
+            return
+        if at is None:
+            at = (pn["vx"] + pn["w"] / pn["k"] / 2, pn["vy"] + pn["h"] / pn["k"] / 2)
+        sx, sy = (at[0] - pn["vx"]) * pn["k"], (at[1] - pn["vy"]) * pn["k"]     # its place in the panel
+        self.view_zoom *= factor
+        self.view_zoom = min(max(self.view_zoom, 1.0), float(config.app("canvas.max_zoom", 32)))
+        k = pn["kf"] * self.view_zoom
+        self.view_x, self.view_y = at[0] - sx / k, at[1] - sy / k
+        self._apply_view()
+
+    def _zoom_fit(self, *_) -> None:
+        self.view_zoom, self.view_x, self.view_y = 1.0, 0.0, 0.0
+        self._apply_view()
+
+    def _on_wheel(self, _s, delta) -> None:
+        pn = self._hovered_panel()
+        if pn is None or not delta:
+            return
+        self._zoom_at(float(config.app("canvas.zoom_step", 1.2)) ** float(delta), pn, self._mouse_canvas(pn))
+
+    def _start_pan(self, pn) -> None:
+        self._pan = dict(mouse=tuple(dpg.get_mouse_pos(local=False)), v0=(self.view_x, self.view_y), k=pn["k"])
+
+    def _update_pan(self) -> None:
+        pan = self._pan
+        if pan is None:
+            return
+        if not any(dpg.is_mouse_button_down(b) for b in (dpg.mvMouseButton_Left, dpg.mvMouseButton_Right,
+                                                        dpg.mvMouseButton_Middle)):
+            self._pan = None
+            return
+        mx, my = dpg.get_mouse_pos(local=False)
+        x = pan["v0"][0] - (mx - pan["mouse"][0]) / pan["k"]
+        y = pan["v0"][1] - (my - pan["mouse"][1]) / pan["k"]
+        if (x, y) != (self.view_x, self.view_y):
+            self.view_x, self.view_y = x, y
+            self._apply_view()
+
+    def _on_pan_click(self, *_) -> None:
+        pn = self._hovered_panel()
+        if pn is not None:
+            self._start_pan(pn)
 
     def _set_brightness(self, attr: str, v: float) -> None:
         setattr(self.p.display, attr, max(1e-6, float(v)))
@@ -218,14 +287,26 @@ class PreviewMixin:
         for pn in self._panels:
             dpg.delete_item(pn["img"], children_only=True)
             tex = self._tex.get(pn["layer"])
-            x0, y0 = pn["ox"], pn["oy"]
+            x0, y0, w, h = pn["ox"], pn["oy"], pn["w"], pn["h"]
+            cw, ch = self._canvas_size()
+            u0, v0 = pn["vx"] / cw, pn["vy"] / ch                 # the part of the canvas in view
+            u1, v1 = u0 + w / pn["k"] / cw, v0 + h / pn["k"] / ch
             if tex is not None:
-                dpg.draw_image(tex[0], (x0, y0), (x0 + pn["w"], y0 + pn["h"]), parent=pn["img"])
-            else:
-                dpg.draw_rectangle((x0, y0), (x0 + pn["w"], y0 + pn["h"]), fill=(0, 0, 0, 255), color=(0, 0, 0, 0),
-                                   parent=pn["img"])
-            dpg.draw_rectangle((x0 - 1, y0 - 1), (x0 + pn["w"], y0 + pn["h"]), color=self._edge_colour(),
+                dpg.draw_image(tex[0], (x0, y0), (x0 + w, y0 + h), uv_min=(u0, v0), uv_max=(u1, v1),
                                parent=pn["img"])
+            else:
+                dpg.draw_rectangle((x0, y0), (x0 + w, y0 + h), fill=(0, 0, 0, 255), color=(0, 0, 0, 0),
+                                   parent=pn["img"])
+            col = self._edge_colour()                            # the canvas edges that are in view
+            eps = 1e-6
+            if u0 <= eps:
+                dpg.draw_line((x0 - 1, y0 - 1), (x0 - 1, y0 + h), color=col, parent=pn["img"])
+            if v0 <= eps:
+                dpg.draw_line((x0 - 1, y0 - 1), (x0 + w, y0 - 1), color=col, parent=pn["img"])
+            if u1 >= 1 - eps:
+                dpg.draw_line((x0 + w, y0 - 1), (x0 + w, y0 + h), color=col, parent=pn["img"])
+            if v1 >= 1 - eps:
+                dpg.draw_line((x0 - 1, y0 + h), (x0 + w, y0 + h), color=col, parent=pn["img"])
             self._draw_grid(pn)
         self._overlays_dirty = True
 
@@ -237,14 +318,17 @@ class PreviewMixin:
             return
         col = (255, 255, 255, int(round(255 * min(1.0, d.grid_opacity))))
         cw, ch = self._canvas_size()
-        x0, y0 = pn["ox"], pn["oy"]
-        for g in range(0, cw + 1, step):
-            dpg.draw_line((x0 + g * k, y0), (x0 + g * k, y0 + pn["h"]), color=col, parent=pn["grid"])
-        for g in range(0, ch + 1, step):
-            dpg.draw_line((x0, y0 + g * k), (x0 + pn["w"], y0 + g * k), color=col, parent=pn["grid"])
+        x0, y0, vx, vy = pn["ox"], pn["oy"], pn["vx"], pn["vy"]
+        first_x, last_x = int(math.ceil(vx / step)) * step, min(cw, vx + pn["w"] / k)
+        first_y, last_y = int(math.ceil(vy / step)) * step, min(ch, vy + pn["h"] / k)
+        for g in range(first_x, int(last_x) + 1, step):
+            dpg.draw_line((x0 + (g - vx) * k, y0), (x0 + (g - vx) * k, y0 + pn["h"]), color=col, parent=pn["grid"])
+        for g in range(first_y, int(last_y) + 1, step):
+            dpg.draw_line((x0, y0 + (g - vy) * k), (x0 + pn["w"], y0 + (g - vy) * k), color=col, parent=pn["grid"])
 
     def _S(self, pn, x, y):
-        return pn["ox"] + x * pn["k"], pn["oy"] + y * pn["k"]
+        """Canvas pixels to the panel's drawing coordinates (zoomed and panned)."""
+        return pn["ox"] + (x - pn["vx"]) * pn["k"], pn["oy"] + (y - pn["vy"]) * pn["k"]
 
     def _redraw_overlays(self) -> None:
         self._overlays_dirty = False
@@ -392,7 +476,7 @@ class PreviewMixin:
 
     def _mouse_canvas(self, pn) -> tuple[float, float]:
         mx, my = dpg.get_drawing_mouse_pos()
-        return (mx - pn["ox"]) / pn["k"], (my - pn["oy"]) / pn["k"]
+        return (mx - pn["ox"]) / pn["k"] + pn["vx"], (my - pn["oy"]) / pn["k"] + pn["vy"]
 
     def _snapped(self, x: float, y: float, pn=None) -> tuple[float, float]:
         d = self.p.display
@@ -409,6 +493,9 @@ class PreviewMixin:
         return probe_center(obj)
 
     def _canvas_press(self, pn) -> None:
+        if dpg.is_key_down(dpg.mvKey_LAlt) or dpg.is_key_down(dpg.mvKey_RAlt):
+            self._start_pan(pn)                  # Alt + drag pans, as the right and middle buttons do
+            return
         fx, fy = self._mouse_canvas(pn)
         k = pn["k"]
         if self._placing():

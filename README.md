@@ -138,7 +138,7 @@ the fitted radii, in the blank canvas's background index; Fresnel lens as thin).
 ├──────────────────────────────┤                                                      │                │
 │ Properties                   │ timeline: ticks, computed part, in/out, playhead     │                │
 │ form of the selection        │ Run · Pause · Stop · Play · ◀ ▶ · In Out · Loop Live │                │
-│                              │ Grid · step · Snap · opacity · Graphs · True colour  │                │
+│                              │ Zoom · Grid · Snap · Graphs · True colour            │                │
 ├──────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Status bar: last message · run state                                                                 │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -154,7 +154,8 @@ the fitted radii, in the blank canvas's background index; Fresnel lens as thin).
 | Handles | selected object: rotation lever (Shift: 15° steps), corner grip (size), lens surface handles (radii), outline points, fibre nodes and Bézier handles, probe ends, graph box grip |
 | Timeline | ticks in frames; computed part shaded; in/out brackets = export range (drag them); playhead |
 | Transport | Run, Pause/Resume run, Stop, Play/Pause, frame back/forward, In, Out, Clear, Loop, Live (follow the newest frame), position (frame and step), speed, shown layers, arrangement |
-| View row (under the transport) | Grid, grid step, Snap, grid opacity; Graphs on the canvas, Graph column; Separate wavelengths, True colour |
+| View row (under the transport) | Zoom −, zoom %, +, Fit; Grid, grid step, Snap, grid opacity; Graphs on the canvas, Graph column; Separate wavelengths, True colour |
+| Canvas zoom | 100 % (whole canvas) to 3200 %, both pictures together; wheel zooms at the pointer; right or middle button drag, or Alt + drag, pans |
 | Undo / redo | unlimited; an edit becomes a step when it has finished (mouse released, field left) |
 | Clipboard | cut, copy, paste, duplicate of sources, parts, probes and colour schemes, as XML text |
 | Colour schemes | project schemes from any scheme; gradient editor: click adds a stop, drag moves it, drag away or double-click removes it; colour and position fields |
@@ -167,7 +168,7 @@ Menus:
 |---|---|
 | File | New, Open, Recent projects (session), Examples, Save, Save as, Open scene image, Blank canvas, Export (field, intensity, both, field frame, intensity frame, probe data as CSV), Export last, Save shown picture as PNG, Exit |
 | Edit | Undo, Redo, Cut, Copy, Paste, Duplicate, Delete, Select all |
-| View | Panes (project tree, properties, status bar, probe graphs), preview resolution, preview frames (every 1st/2nd/4th), UI zoom, grid, handles, labels, graphs on the canvas |
+| View | Panes (project tree, properties, status bar, probe graphs), preview resolution, preview frames (every 1st/2nd/4th), UI zoom, canvas zoom in / out / whole canvas, grid, handles, labels, graphs on the canvas |
 | Simulation | Run, Pause/resume run, Stop, Play/Pause, compute backend, re-run after edits, separate wavelengths, memory warning |
 | Help | Manual (this README), About (versions, GPU, system information to copy) |
 
@@ -211,7 +212,7 @@ existing setting; an unknown key or a wrong value stops the start with the key's
 |---|---|
 | `app.backend` | compute backend at start (`--backend` overrides it) |
 | `app.ui` | window size, left pane width, tree pane height, probe graph column width, font size, UI zoom and its choices, rows per tree group |
-| `app.canvas` | pick radius, snap radius, rotation lever length (screen pixels) |
+| `app.canvas` | pick radius, snap radius, rotation lever length (screen pixels), zoom step per wheel notch, largest zoom |
 | `app.playback` | speed and its choices, loop, live |
 | `app.run` | memory warning on/off, memory budget as a share of the physical memory |
 | `app.export` | file name, format (`MP4`, `MPEG1`, `AVI`, `MOV`, `MOV_PNG`, `PNG`, `JPEG`, `EXR`, `EXR_ROOT`), layers, part outlines |
@@ -236,6 +237,9 @@ Values in a saved project are its own; an attribute a `.wdproj` file leaves out 
 | Ctrl/Cmd + Z, Y (Shift + Z) | undo, redo |
 | Ctrl/Cmd + X, C, V, D, A | cut, copy, paste, duplicate, select all |
 | F1 | manual |
+| Mouse wheel on a picture | zoom in / out at the pointer |
+| Right or middle drag, Alt + drag | pan the zoomed canvas |
+| Ctrl/Cmd + =, -, 0 | zoom in, zoom out, whole canvas |
 | Click / drag on canvas | select / move objects (centres snap to the grid when snapping is on); drag empty space for a marquee |
 | Arrows (Shift: ×10), Tab | after a click on the canvas: nudge the selection, select the next object |
 | Del, Backspace | after a click on the canvas: remove the selected objects |
